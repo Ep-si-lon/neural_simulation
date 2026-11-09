@@ -1,0 +1,6 @@
+.venv/
+scratch/
+videos/
+WhatsApp*/
+__pycache__/
+out/*_debug.mp4
