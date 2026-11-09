@@ -44,7 +44,7 @@ def draw(ball, tool, az, el, label):
             cv2.circle(img, (int(sx(px_[0])), int(sy(py_[0]))), max(int(r * S), 3), (60, 60, 200), -1, cv2.LINE_AA)
     cv2.putText(img, label, (8, 22), cv2.FONT_HERSHEY_SIMPLEX, .5, (20, 20, 20), 1, cv2.LINE_AA); return img
 
-TITLES = {'flat': 'FLAT PLATE on top, press + release (fitted scenario)', 'point': 'POINT FORCE on top, press + release (prediction, not validated)', 'side': 'TWO FLAT PLATES from the sides, squeeze + release (prediction, not validated)'}
+TITLES = {'deep': 'FLAT PLATE on top, DEEP press to 75% compression, release (prediction, not validated)', 'flat': 'FLAT PLATE on top, press + release (fitted scenario)', 'point': 'POINT FORCE on top, press + release (prediction, not validated)', 'side': 'TWO FLAT PLATES from the sides, squeeze + release (prediction, not validated)'}
 
 def main(mode, params='recovery_time/params_3d.json', out_path=None):
     ks, kb, kr, cd = json.load(open(params))['ks_kb_kr_cd']   # latest fit (recovery_time study)
@@ -60,7 +60,7 @@ def main(mode, params='recovery_time/params_3d.json', out_path=None):
     N = 60; w0 = b.shape()[1]
     for i in range(N):
         a_ = (i + 1) / N
-        if mode == 'flat': b.tool = ('plate', rest - rest * 0.38 * a_, 0)
+        if mode in ('flat', 'deep'): b.tool = ('plate', rest - rest * (0.75 if mode == 'deep' else 0.38) * a_, 0)
         elif mode == 'point': b.tool = ('probe', rest - rest * 0.50 * a_, 0.006)
         else: b.tool = ('side', w0 - w0 * 0.40 * a_, 0)
         b.run(0.0015, DT, damp=80); t[0] += 1.5e-3; frame('pressing')
