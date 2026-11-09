@@ -1,89 +1,83 @@
-# neural_simulation — squishy ball: bounce + recovery model from video
+# neural_simulation: learning a soft ball's deformation from video
 
-A simple model of one foam ball, fitted from 1080p/240 fps clips of a steel tin pressing it and being pulled away,
-then **tested on clips held out of the fit (no refitting)**.
+One foam ball, one steel tin that presses it and is pulled away, filmed at 1080p / 240 fps. From that video I fit simple physics models of how the ball squashes, recovers and hops, and test them on clips held out of the fit (no refitting).
+**No neural networks are used**: tracking is colour thresholding plus curve fits, models are hand-written physics, and fitting is nonlinear least squares (system identification).
 
 ```bash
-# needs python3, ffmpeg, and the four originals in videos/IMG_053{6,7,8,9}.MOV (not in git, ~157 MB)
-./run.sh        # track -> fit/evaluate -> demo videos; results in out/
+# needs python3, ffmpeg and the four originals in videos/IMG_053{6,7,8,9}.MOV (not in git, ~157 MB)
+./run_all.sh              # ~20 min: tracking, the three 1D models, evaluations with the saved 3D parameters, demo videos
+./run_all.sh --fit-3d     # + refit all five 3D models (each ~10-20 min)
 ```
 
-Outputs: `data/*.csv` (per-frame tracks), `out/results.txt`, `out/loo_predictions.png`, `out/demo_IMG_0538.mp4`, `out/demo_IMG_0539.mp4`
-(real clip beside the shaded-ellipsoid proxy, 8x slow-mo, times and heights overlaid).
+Every folder under `tracking/`, `models/` and `evaluation/` has its own `README.md` (formulas, parameters, assumptions, limitations, results), `src/`, `outputs/` and `run.sh`.
 
-## What the video shows (and how this differs from my first plan)
+Clips: 0536 and 0537 are training (deep squeezes, 36-41 % of height); 0538 and 0539 are test (shallow squeezes, 67 %).
+Plain-words explanations of the terms used here: [docs/glossary.md](docs/glossary.md).
 
-My initial plan modelled a 20 Hz damped oscillation of the ball's height (Kelvin-Voigt). The full-resolution data do not support that:
+## What the video taught me
 
-- After release the ball's **height barely oscillates**; it recovers from about -2 to -3 % of rest height without overshoot, over roughly 100 ms.
-- The visible "ringing" is the **whole ball hopping off the table** (about 0.5-0.8 cm, three hops, ~50 ms period). The ball is lifted by the rebound and lands again.
+- **Time base:** the files have irregular frame gaps (2/3 are 1/240 s, 1/3 are 1/120 s). Fitting free-flight arcs gives gravity of about 8.7 m/s² with the file timestamps against 9.4-25 with a uniform 1/240 s, so the **file timestamps are used**.
+- **The "ring" is a hop, not a vibration:** after release the height barely oscillates (it recovers smoothly). The visible bouncing is the whole ball leaving the table by 3-8 mm. Part of it may come from friction or suction with the tin, which this video cannot separate from the ball's own elasticity.
+- **Shape:** the outline is a flat-sided cylinder while pressed (squareness n of 4-6) and an ellipse (n = 2) again within about 10 frames. Width changes only 1-10 % while height drops 33-64 %, so volume is not conserved (foam, not a sealed gas).
 
-So the model is: **rigid ballistic hops with restitution + contact dwell, plus an exponential height recovery.**
+## Repository map: one problem, several ways to solve it
 
-## Time base
+```
+tracking/        video -> measurements (ball edges, outline, shape)                    shared by every model
+models/
+  lumped_1d/     Family 1: the ball as one or two vertical bodies
+    bounce_recovery/     rigid hop (restitution) + exponential height recovery            works on 3 of 4 clips
+    two_mass_spring/     bottom + top mass, nonlinear spring-damper                       loses to a plain exponential
+    fast_snap/           + stiff deep-compression regime                                  no improvement
+  mesh_3d/       Family 2: 3D mass-spring surface mesh with a pressing tool
+    gas_shell/           sealed gas inside a stretchy skin                                bulges, rings: abandoned
+    foam_core_height_fit/  foam core (radial springs), fit to height/lift/width           first good 3D fit
+    foam_core_shape_fit/   + outline squareness and width over time                       matches shape, no hop
+    foam_core_no_lift/     hop ignored in the fit                                         hops far too high
+    foam_core_with_lift/   hop included (weight 4)                                        deep-squeeze hops match
+evaluation/      recovery_time, hop_height, load_cases (flat / point / side / 75 %), real_vs_model
+shared/          code several models import (3D engine, scenario runner, renderers, clip preparation)
+docs/            assignment PDF, initial plan, write-up of the 1D experiments, glossary
+```
 
-The files are variable frame rate: 2/3 of frame gaps are 1/240 s and 1/3 are 1/120 s (the camera appears to have dropped frames; cause not verified).
-I tested both time bases using the ball itself: fitting free-flight arcs of the top edge gives gravity of **7.3-9.6 m/s² (mean ~8.7) with file timestamps**
-versus **9.4-25 m/s² with a uniform 1/240 s**. True g is 9.81, so **file timestamps (pts) are used**; frames are never resampled or duplicated.
-
-## Model
-
-State starts at the first apex of the hop (velocity zero), measured from the clip itself: lift `A`, height deviation `δ_a`.
-
-- Hops: gravity 9.81 m/s², restitution `e` (each apex is `e²` of the previous), contact dwell `t_c` on the table per bounce.
-- Height: `δ(t) = δ_a · exp(-t/τ)`.
-- Observed top edge: `top_up(t) = L(t; A, e, t_c) + rest · δ(t)`.
-- Fitted: `τ` from the height signal alone (pooled over training clips), then `e`, `t_c` from the top edge (`scipy.optimize.least_squares`, multi-start, small per-clip time shift nuisance).
-- A held-out prediction uses only that clip's own measured apex height, height dip and apex time.
+Family overviews: [models/lumped_1d](models/lumped_1d/README.md), [models/mesh_3d](models/mesh_3d/README.md), [evaluation](evaluation/README.md). Video to share with the team: [evaluation/real_vs_model/outputs](evaluation/real_vs_model/outputs/).
 
 ## Results
 
-Training: IMG_0536 + IMG_0537. Test: IMG_0538, IMG_0539. Also leave-one-clip-out over all four. RMSE of the top edge over the 0.2 s after the first apex, as % of ball height.
+**1. [Bounce + recovery model](models/lumped_1d/bounce_recovery/README.md)** (hops with restitution, then exponential height recovery; [models/lumped_1d/bounce_recovery](models/lumped_1d/bounce_recovery/README.md)): restitution e = 0.66-0.71, recovery time constant 44-59 ms, table dwell 8-14 ms. Leave-one-clip-out, it beats both baselines on 3 of 4 clips (fails on 0538).
 
-| Held-out clip | Model | Single exponential | Stay at rest |
-| --- | --- | --- | --- |
-| 0538 (train 536+537) | 0.99 | **0.52** | 1.14 |
-| 0539 (train 536+537) | **0.63** | 1.18 | 1.77 |
-| 0536 (leave-one-out) | **1.11** | 1.69 | 4.42 |
-| 0537 (leave-one-out) | **0.97** | 1.19 | 3.13 |
-| 0538 (leave-one-out) | 1.18 | **0.55** | 1.14 |
-| 0539 (leave-one-out) | **0.63** | 1.19 | 1.77 |
+**2. [Two-mass squeeze + release simulation](models/lumped_1d/two_mass_spring/README.md):** stiffness k = 11-16 x 10^3 s^-2 per unit mass, damping ratio 2.6-3.2 (strongly overdamped). Height error 6-8 % against 4-6 % for a plain exponential, so **it loses to the baseline on all four clips**. The real ball snaps back within 1-2 frames.
 
-Leave-one-out parameters: restitution `e` 0.66-0.71, `τ` 44-59 ms, `t_c` 8-14 ms. Per-clip fits: `e` 0.63-0.80, `τ` 30-72 ms, `t_c` 7-16 ms.
+**3. [3D foam-core ball](models/mesh_3d/README.md)** (162 nodes: edge springs `ks`, bending springs `kb`, radial foam-core springs `kr`, damping `cd`): the fitted shape matches the measured width within 0.5-1.6 % and squeezes with a slight bulge; held-out height error is 6-8 %, again no better than a plain exponential. Fitted values (per unit mass):
 
-**The model beats both baselines on 3 of 4 leave-one-out clips, not all four.** On IMG_0538 it loses to the single exponential and is about level with stay-at-rest.
-Likely cause (not confirmed): tin glare corrupts the top edge around the first apex in that clip, so the starting lift is overestimated; the ball's hops there are also small.
+| Fit | ks | kb | kr | cd |
+| --- | --- | --- | --- | --- |
+| with hop term (`foam_core_with_lift`) | 127 | 276 | 1000 | 23 |
+| without hop term (`foam_core_no_lift`) | 111 | 951 | 2577 | 34.5 |
 
-## Squeeze and release: two-mass simulation (negative result)
+**4. [Time to regain shape](evaluation/recovery_time/README.md) (hops ignored), 95 % of rest height, ms:**
 
-`src/sim.py` simulates the deformation itself: a bottom mass on the table and a top mass joined by a nonlinear spring-damper, with gravity and a stiff table contact.
-Squeeze: the top follows the tin (measured top edge = input). Release: the ball is simulated from its compressed state at rest (measured), with no refit on the held-out clip.
-Parameters are mass-normalised (no ball mass measured). Fitted on training clips with `least_squares` (soft-L1, multi-start).
+| Test clip | Real | Exponential | 1-DOF spring | Fast+slow exp | 3D foam |
+| --- | --- | --- | --- | --- | --- |
+| 0538 | 25 | 26 | 26 | 28 | 22 |
+| 0539 | 13 | 26 | 26 | 27 | 22 |
 
-| Held-out clip | Height RMSE, simulation | Height RMSE, exponential recovery | Stay compressed |
-| --- | --- | --- | --- |
-| 0538 | 6.6 % | **4.0 %** | 32.1 % |
-| 0539 | 6.2 % | **3.8 %** | 31.4 % |
-| 0536 | 8.3 % | **5.8 %** | 56.3 % |
-| 0537 | 7.9 % | **5.6 %** | 62.4 % |
+Models are within -3 to +14 ms. Two clips pressed equally deep differ by 12 ms in reality, so **this test cannot separate the models**.
 
-- **The simulation loses to a plain exponential on all four clips.** Fitted stiffness is consistent across folds (spring constant k about 11-16 x 10^3 s^-2 per unit mass; relative-mode frequency 2*sqrt(k) = 33-40 Hz; damping ratio c/sqrt(k) = 2.6-3.2, i.e. strongly overdamped), but the real ball snaps most of the way back within 1-2 frames (5-10 ms) after the tin leaves, while the simulation recovers over about 50 ms. Hop lift is under-predicted for 0538/0539 and over-predicted for 0537. The fitted cubic (stiffening) term went to zero in three of four folds, so the nonlinearity was not supported.
-- Likely causes (not confirmed): the first frames after release are partly hand-driven and partly corrupted by tin glare; one lumped spring cannot make a fast snap and a slow tail.
-- Not tried: a separate fast-snap phase before the spring-damper takes over. The demo `out/demo_squeeze_*.mp4` shows the squeeze and release next to this simulation, including where it disagrees.
-- The bounce + recovery model above remains the better-performing model for the post-release motion. Squeeze compression levels differ (36-41 % of height in 0536/0537, 67 % in 0538/0539), so the 536+537 -> 538/539 split also tests extrapolation to shallower squeezes.
+**5. [Hop height](evaluation/hop_height/README.md) (mm):** real 7.0, 7.4 (train) and 3.6, 5.2 (test). Without the hop term the model overshoots (50-63 mm after deep squeezes); with it, deep-squeeze hops match (5.9, 8.9 mm) but the shallow-squeeze test clips get no hop (0.0 mm).
 
-## Assumptions and limitations
+**6. [Other loads](evaluation/load_cases/README.md)** (predictions from parameters fitted on flat top presses only; not validated): `evaluation/load_cases/outputs/with_lift/lift_{flat,point,side}.mp4` (flat on top, point force on top, two flat plates from the sides) and `deep_withlift.mp4` (same folder) (75 % press, outside the training range, mesh crumples).
 
-- **Scope:** only the free motion after the first apex. The squeeze and the hand-driven release are not modelled; release speed is uncontrolled.
-- **Scale depends on a rough diameter (6.7 cm, not accurately measured).** It sets pixels-per-metre and so the gravity term; a 5 % error shifts the hop timing. No ball mass was measured, so no force/stiffness values are reported.
-- **Lumped, vertical, rigid-hop model.** Ball treated as one body plus a height recovery; no rotation, shear, or sideways motion. Impact squashing is only represented by the dwell time `t_c`.
-- **Recovery `τ` is weakly determined:** the dip is 2-3 % of height, comparable to tracking noise (±1-2 %). Treat `τ` as an estimate, not a material constant.
-- **Width in the demo is measured**, not predicted; only height and lift come from the model. Foam is compressible, so no volume-preserving rule is assumed.
-- **Top edge doubles as hop proxy.** The bottom edge saturates at the table cut line (row 740) while the ball touches the table, so it is not used for fitting.
-- **Tracking:** fixed HSV threshold, table line fixed at row 740 (same camera pose in all clips), soft-edge subpixel crossings. Debug overlays are generated in `out/*_debug.mp4` but I only spot-checked traces, not every frame.
-- **Four clips**: parameter spread is a rough repeatability estimate, not a confidence interval. The 3-D object is only a shaded ellipsoid; no 3-D reconstruction.
-- Same ball and same tin in all clips; the "fresh instance" is a different clip of the same interaction, not a different ball.
+## Limitations (read these before relying on any number)
+
+- **The press is an input.** The compressed height and release time come from the video; the models predict what happens after release (and the shape under the loads above). The 2D squeeze demos replay the measured tin-driven height before release.
+- **Not validated beyond top-down flat presses.** The point-force and side-plate videos are extrapolations.
+- **No ball mass was measured**, so stiffness and damping are per unit mass; diameter (6.7 cm) is a rough estimate that sets the pixel scale and the gravity term.
+- **Mass-spring parameters depend on the mesh.** A finer mesh would change `ks`, `kb`, `kr`; a finite-element model with Young's modulus would not.
+- **Tin interaction is mixed into the results.** Friction or suction from the tin may add to the hop and speed up the first frames after release; the tin itself is not tracked.
+- **Fit quality:** none of the physics models beats a plain exponential on held-out height error; the 3D model's optimizer sometimes stalled at its starting point; four clips give a rough spread, not a confidence interval.
+- **Tracking:** fixed colour threshold, table line fixed at pixel row 740 (one camera pose), timestamps are from the file and the cause of the irregular frame gaps is not verified. I spot-checked tracks by plot and frames, not every debug frame.
 
 ## Credits
 
-Python, NumPy, SciPy, OpenCV, Matplotlib, FFmpeg. Code and analysis were written with Claude Code (Anthropic's AI assistant); results were checked by running the pipeline end to end.
+Python, NumPy, SciPy, OpenCV, Matplotlib, FFmpeg. Code and analysis were written with Claude Code (Anthropic's AI assistant); results were checked by running the pipeline.

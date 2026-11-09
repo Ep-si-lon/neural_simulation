@@ -3,4 +3,4 @@ scratch/
 videos/
 WhatsApp*/
 __pycache__/
-out/*_debug.mp4
+tracking/outputs/debug/
