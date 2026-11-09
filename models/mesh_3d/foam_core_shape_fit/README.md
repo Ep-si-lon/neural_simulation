@@ -22,6 +22,8 @@ Same physics as `../foam_core_height_fit`. Fit residuals: `h − h_meas`, `ℓ �
 
 Finding: the shape snaps back as fast as the height (n falls from 5 to about 2.4 within 2 frames), so the fast first frames are the ball's own, not only a measurement artifact.
 
+Note: `foam_core_with_lift` ended on these same parameters, so its videos are nearly identical to this model's.
+
 ## Assumptions and limitations
 As `foam_core_height_fit`. The simulated ball does not hop (lift RMSE equals the size of the real hops). The deep-squeeze training clips are not flat-sided enough (n error about 0.9). Fit used 2 starts and 20 steps; it may not be a true optimum.
 

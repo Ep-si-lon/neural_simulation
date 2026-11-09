@@ -3,7 +3,7 @@
 **Idea.** Same as `foam_core_no_lift` but the residual also contains the hop: `LIFT_W · (ℓ − ℓ_meas)` with `LIFT_W = 4`, so the model must hop about as high as the real ball.
 
 ## Formulas and parameters
-Same physics as `../foam_core_height_fit`. Fitted (per unit mass): `k_s = 126.6`, `k_b = 276.4`, `k_r = 1000.5`, `c_d = 23.0`. The optimizer's second start (these values) ended exactly where it began and still had the lower cost (0.43 against 0.70 for the hopping start), so this may not be a true optimum.
+Same physics as `../foam_core_height_fit`. Fitted (per unit mass): `k_s = 126.6`, `k_b = 276.4`, `k_r = 1000.5`, `c_d = 23.0`. **These values are the same as `foam_core_shape_fit`'s** (126.6, 276.4, 1000.5, 23.0), so the two folders describe effectively the same model and their videos look alike. The optimizer's second start (these values, seeded from the shape fit) ended exactly where it began and still had the lower cost (0.43 against 0.70 for the hopping start), so this may not be a true optimum.
 
 ## Results (peak lift in mm; ball height 67 mm; real 7.0, 7.4, 3.6, 5.2)
 | Clip | Set | Real | No-lift fit | With-lift fit |
