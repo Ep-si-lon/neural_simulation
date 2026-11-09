@@ -69,6 +69,10 @@ class Ball:
             pen = np.clip(x[:, 1] - y, 0, None); on = pen > 0
             fy = np.where(on, -self.kt * pen - 2 * .3 * np.sqrt(self.kt) * np.minimum(v[:, 1], 0), 0) * self.m
             return np.stack([np.zeros(self.N), fy, np.zeros(self.N)], 1)
+        if kind == 'side':                                   # two vertical flat plates at x = +-gap/2 squeezing sideways
+            half = y / 2; pr = np.clip(x[:, 0] - half, 0, None); pl = np.clip(-half - x[:, 0], 0, None)
+            fx = (-self.kt * pr + self.kt * pl - 2 * .3 * np.sqrt(self.kt) * (np.where(pr > 0, np.maximum(v[:, 0], 0), 0) - np.where(pl > 0, np.minimum(v[:, 0], 0), 0))) * self.m
+            return np.stack([fx, np.zeros(self.N), np.zeros(self.N)], 1)
         c = np.array([self.cx, y + r, self.cz]); d = x - c; dist = np.linalg.norm(d, axis=1) + 1e-12; pen = np.clip(r - dist, 0, None)
         return ((self.kt * pen)[:, None] * d / dist[:, None]) * self.m
 
