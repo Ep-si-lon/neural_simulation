@@ -1,0 +1,13 @@
+split 536+537 -> 538, 539
+  train ['IMG_0536', 'IMG_0537']: k=12926 c=331 k_hi=1068 x0=57% of rest
+    IMG_0538: height RMSE fast-snap 6.7% | exp-recovery 4.1%   top 7.2%  lift 2.3%
+    IMG_0539: height RMSE fast-snap 6.2% | exp-recovery 3.9%   top 7.2%  lift 3.2%
+leave-one-out
+  train ['IMG_0537', 'IMG_0538', 'IMG_0539']: k=15404 c=398 k_hi=10068 x0=60% of rest
+    IMG_0536: height RMSE fast-snap 8.3% | exp-recovery 5.8%   top 10.0%  lift 3.0%
+  train ['IMG_0536', 'IMG_0538', 'IMG_0539']: k=14895 c=345 k_hi=4542 x0=56% of rest
+    IMG_0537: height RMSE fast-snap 7.8% | exp-recovery 5.6%   top 12.4%  lift 9.6%
+  train ['IMG_0536', 'IMG_0537', 'IMG_0539']: k=13208 c=335 k_hi=280 x0=53% of rest
+    IMG_0538: height RMSE fast-snap 6.6% | exp-recovery 4.0%   top 7.1%  lift 2.3%
+  train ['IMG_0536', 'IMG_0537', 'IMG_0538']: k=18945 c=503 k_hi=642 x0=31% of rest
+    IMG_0539: height RMSE fast-snap 6.2% | exp-recovery 3.8%   top 7.2%  lift 3.2%
