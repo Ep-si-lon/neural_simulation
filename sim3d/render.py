@@ -46,10 +46,10 @@ def draw(ball, tool, az, el, label):
 
 TITLES = {'flat': 'FLAT PLATE on top, press + release (fitted scenario)', 'point': 'POINT FORCE on top, press + release (prediction, not validated)', 'side': 'TWO FLAT PLATES from the sides, squeeze + release (prediction, not validated)'}
 
-def main(mode):
-    ks, kb, kr, cd = json.load(open('recovery_time/params_3d.json'))['ks_kb_kr_cd']   # latest fit (recovery_time study)
+def main(mode, params='recovery_time/params_3d.json', out_path=None):
+    ks, kb, kr, cd = json.load(open(params))['ks_kb_kr_cd']   # latest fit (recovery_time study)
     b = Ball(sub=SUB, ks=ks, kb=kb, kr=kr, cd=cd); b.cx = b.cz = 0.0; b.run(0.08, DT, damp=80); rest = b.shape()[0]
-    out = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'bgr24', '-s', f'{2*PX}x{PX+30}', '-r', '30', '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', f'sim3d/latest_{mode}.mp4'], stdin=subprocess.PIPE)
+    out = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'bgr24', '-s', f'{2*PX}x{PX+30}', '-r', '30', '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', out_path or f'sim3d/latest_{mode}.mp4'], stdin=subprocess.PIPE)
     t = [0.0]
     def frame(phase):
         h = b.shape()[0] / rest; side = draw(b, b.tool, 0, 0, f'side view: {phase}'); obl = draw(b, b.tool, 35, 25, f'oblique 3D: height {100*h:.0f}% of rest')
@@ -67,6 +67,6 @@ def main(mode):
     for _ in range(10): frame('hold')
     b.tool = None
     for i in range(160): b.run(0.0015, DT); t[0] += 1.5e-3; frame('released')
-    out.stdin.close(); out.wait(); print('wrote', f'sim3d/latest_{mode}.mp4')
+    out.stdin.close(); out.wait(); print('wrote', out_path or f'sim3d/latest_{mode}.mp4')
 
-if __name__ == '__main__': main(sys.argv[1] if len(sys.argv) > 1 else 'flat')
+if __name__ == '__main__': main(*(sys.argv[1:4] if len(sys.argv) > 1 else ['flat']))
