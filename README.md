@@ -54,6 +54,24 @@ Leave-one-out parameters: restitution `e` 0.66-0.71, `τ` 44-59 ms, `t_c` 8-14 m
 **The model beats both baselines on 3 of 4 leave-one-out clips, not all four.** On IMG_0538 it loses to the single exponential and is about level with stay-at-rest.
 Likely cause (not confirmed): tin glare corrupts the top edge around the first apex in that clip, so the starting lift is overestimated; the ball's hops there are also small.
 
+## Squeeze and release: two-mass simulation (negative result)
+
+`src/sim.py` simulates the deformation itself: a bottom mass on the table and a top mass joined by a nonlinear spring-damper, with gravity and a stiff table contact.
+Squeeze: the top follows the tin (measured top edge = input). Release: the ball is simulated from its compressed state at rest (measured), with no refit on the held-out clip.
+Parameters are mass-normalised (no ball mass measured). Fitted on training clips with `least_squares` (soft-L1, multi-start).
+
+| Held-out clip | Height RMSE, simulation | Height RMSE, exponential recovery | Stay compressed |
+| --- | --- | --- | --- |
+| 0538 | 6.6 % | **4.0 %** | 32.1 % |
+| 0539 | 6.2 % | **3.8 %** | 31.4 % |
+| 0536 | 8.3 % | **5.8 %** | 56.3 % |
+| 0537 | 7.9 % | **5.6 %** | 62.4 % |
+
+- **The simulation loses to a plain exponential on all four clips.** Fitted stiffness is consistent across folds (about 11-16 x 10^3 s^-2, i.e. 17-20 Hz, overdamped with damping ratio about 1.1-1.6), but the real ball snaps most of the way back within 1-2 frames (5-10 ms) after the tin leaves, while the simulation recovers over about 50 ms. Hop lift is under-predicted for 0538/0539 and over-predicted for 0537. The fitted cubic (stiffening) term went to zero in three of four folds, so the nonlinearity was not supported.
+- Likely causes (not confirmed): the first frames after release are partly hand-driven and partly corrupted by tin glare; one lumped spring cannot make a fast snap and a slow tail.
+- Not tried: a separate fast-snap phase before the spring-damper takes over. The demo `out/demo_squeeze_*.mp4` shows the squeeze and release next to this simulation, including where it disagrees.
+- The bounce + recovery model above remains the better-performing model for the post-release motion. Squeeze compression levels differ (36-41 % of height in 0536/0537, 67 % in 0538/0539), so the 536+537 -> 538/539 split also tests extrapolation to shallower squeezes.
+
 ## Assumptions and limitations
 
 - **Scope:** only the free motion after the first apex. The squeeze and the hand-driven release are not modelled; release speed is uncontrolled.
