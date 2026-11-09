@@ -26,4 +26,6 @@ Gas amount constant and isothermal; skin stretchable; uniform pressure; foam wal
 - A real foam ball is porous and does not conserve volume; replaced by `foam_core_height_fit`.
 
 ## Run
-`./run.sh` (about 10 min; needs `tracking/run.sh` first). Code `src/fit_gas.py` (restored from the commit where the gas model was first fitted). Outputs `outputs/results_gas.txt`, `params_gas.json`, and the two earlier demo videos `demo_flat_gas.mp4`, `demo_point_gas.mp4` (produced by the earlier renderer, kept for comparison).
+`./run.sh` (about 10 min; needs `tracking/run.sh` first). Code `src/fit_gas.py` (restored from the commit where the gas model was first fitted). Outputs `outputs/results_gas.txt`, `params_gas.json`, and the two earlier demo videos `demo_flat_gas.mp4`, `demo_point_gas.mp4` (an earlier renderer; superseded by the `real_vs_3d_*` videos).
+
+**Videos** (`outputs/real_vs_3d_IMG_0536|0538|0539.mp4`): real clip, the model's side view and its oblique view on one clock (t = 0 at release, slowed 8x). 0536 is a training clip; 0538 and 0539 are held out. `./render.sh` re-renders them from the saved parameters in about a minute.

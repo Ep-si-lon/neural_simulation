@@ -1,6 +1,6 @@
 """Hop height and recovery time: real clips vs the 3D foam model fitted WITHOUT the lift term (foam_core_no_lift) and WITH it (foam_core_with_lift).
 Both trained on 0536+0537, run unchanged on 0538+0539. Hop height = peak bottom lift in mm (ball height 67 mm = rest height).
-Run: evaluation/hop_height/run.sh -> outputs/results.md, hops.png"""
+Run: models/mesh_3d/foam_core_with_lift/render.sh -> outputs/hop_check.md, hops.png"""
 import json
 import numpy as np
 from scipy.signal import medfilt
@@ -23,7 +23,7 @@ if __name__ == '__main__':
             T, F = scenario(P[lab], c); ax[j].plot(T * 1e3, F[:, 1] * MM, color=col, label=lab); row.append(f'{F[:, 1].max() * MM:.1f}'); t95[lab] = t_first(T, F[:, 0], .95)
         h = medfilt(np.pad(c['h'] / c['rest'], 2, mode='edge'), 5)[2:-2]; row += [f'{t_first(c["t"], h, .95):.0f}', f'{t95["no-lift fit"]:.0f}', f'{t95["with-lift fit"]:.0f}']
         L.append('| ' + ' | '.join(row) + ' |'); ax[j].set_title(f'{n[-4:]} bottom lift (mm)'); ax[j].set_xlabel('ms after release')
-    ax[0].legend(); plt.tight_layout(); plt.savefig('evaluation/hop_height/outputs/hops.png', dpi=80)
+    ax[0].legend(); plt.tight_layout(); plt.savefig('models/mesh_3d/foam_core_with_lift/outputs/hops.png', dpi=80)
     pr = {k: [round(float(v), 1) for v in np.exp(p)] for k, p in P.items()}
     out = '\n'.join(L) + f'\n\nparams (ks, kb, kr, cd): {pr}\n'
-    open('evaluation/hop_height/outputs/results.md', 'w').write(out); print(out)
+    open('models/mesh_3d/foam_core_with_lift/outputs/hop_check.md', 'w').write(out); print(out)

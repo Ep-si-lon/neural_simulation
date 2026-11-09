@@ -27,3 +27,5 @@ As `foam_core_height_fit`. The simulated ball does not hop (lift RMSE equals the
 
 ## Run
 `./run.sh` (about 20 min; needs `tracking/run.sh` first). Code `src/fit_shape.py`. Outputs `outputs/results_shape.txt`, `params_shape.json`.
+
+**Videos** (`outputs/real_vs_3d_IMG_0536|0538|0539.mp4`): real clip, the model's side view and its oblique view on one clock (t = 0 at release, slowed 8x). 0536 is a training clip; 0538 and 0539 are held out. `./render.sh` re-renders them from the saved parameters in about a minute.

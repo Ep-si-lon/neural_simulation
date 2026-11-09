@@ -8,10 +8,12 @@ Same physics as `../foam_core_height_fit`. Fitted (per unit mass): `k_s = 110.6`
 ## Results
 Recovery time is compared with the other models in `../../../evaluation/recovery_time` (95 % height after 22 ms on both test clips; real 25 and 13 ms).
 
-**Side effect:** with nothing constraining the hop, the model launches the ball far too high: 13 mm after a 38 % press, 50–63 mm after the deep training squeezes (real 3–8 mm), and 90 mm at 75 % compression. See `../../../evaluation/hop_height`.
+**Side effect:** with nothing constraining the hop, the model launches the ball far too high: 13 mm after a 38 % press, 50–63 mm after the deep training squeezes (real 3–8 mm), and 90 mm at 75 % compression. Hop table and curves: `../foam_core_with_lift/outputs/hop_check.md`, `hops.png`.
 
 ## Assumptions and limitations
 As `foam_core_height_fit`. The hop height is unconstrained and unphysical; use this model only for recovery time and shape, not for hop. Fit used 2 starts and 20 steps.
 
 ## Run
 `./run.sh` (about 20 min; needs `tracking/run.sh` first). Code `src/fit3d_recovery.py`. Outputs `outputs/params_3d.json`, `fit3d_log.txt`.
+
+**Videos** (`outputs/real_vs_3d_IMG_0536|0538|0539.mp4`): real clip, the model's side view and its oblique view on one clock (t = 0 at release, slowed 8x). 0536 is a training clip; 0538 and 0539 are held out. `./render.sh` re-renders them from the saved parameters in about a minute.

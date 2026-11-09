@@ -36,4 +36,6 @@ The width bulge now matches. Height error is still not better than a plain expon
 Foam is a radial spring field (no shear); skin and core are homogeneous; the plate is removed instantly; the squeeze is quasi-static, only the release is timed; stiffnesses are per unit mass and mesh-dependent; the tin's friction/suction is not modelled.
 
 ## Run
-`./run.sh` (about 15 min; needs `tracking/run.sh` first). Code `src/fit3d.py`. Outputs `outputs/results.txt`, `params.json`, and the earlier demo videos `demo_flat.mp4`, `demo_point.mp4`.
+`./run.sh` (about 15 min; needs `tracking/run.sh` first). Code `src/fit3d.py`. Outputs `outputs/results.txt`, `params.json`, and the earlier demo videos `demo_flat.mp4`, `demo_point.mp4` (an earlier renderer; superseded by the `real_vs_3d_*` videos).
+
+**Videos** (`outputs/real_vs_3d_IMG_0536|0538|0539.mp4`): real clip, the model's side view and its oblique view on one clock (t = 0 at release, slowed 8x). 0536 is a training clip; 0538 and 0539 are held out. `./render.sh` re-renders them from the saved parameters in about a minute.

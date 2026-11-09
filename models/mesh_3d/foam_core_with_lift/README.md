@@ -13,10 +13,12 @@ Same physics as `../foam_core_height_fit`. Fitted (per unit mass): `k_s = 126.6`
 | 0538 | test | 3.6 | 8.7 | 0.0 |
 | 0539 | test | 5.2 | 8.5 | 0.0 |
 
-Matching the hop slows recovery: 95 % height at 40–54 ms against 13–42 ms real. Details: `../../../evaluation/hop_height`.
+Matching the hop slows recovery: 95 % height at 40–54 ms against 13–42 ms real. Hop table and curves (against the no-lift fit and the real clips): `outputs/hop_check.md`, `outputs/hops.png`, produced by `src/hop_check.py`.
 
 ## Assumptions and limitations
 As `foam_core_height_fit`; no hop at all after the shallow (67 %) squeezes; tin friction or suction may account for part of the real hop and is not modelled.
 
 ## Run
-`./run.sh` (about 20 min; needs `tracking/run.sh` first). Code `src/fit3d_lift.py`. Outputs `outputs/params_3d_lift.json`, `fit3d_lift_log.txt`.
+`./run.sh` (about 20 min; needs `tracking/run.sh` first). Code `src/fit3d_lift.py`. Outputs `outputs/params_3d_lift.json`, `fit3d_lift_log.txt`, `hop_check.md`, `hops.png`.
+
+**Videos** (`outputs/real_vs_3d_IMG_0536|0538|0539.mp4`): real clip, the model's side view and its oblique view on one clock (t = 0 at release, slowed 8x). 0536 is a training clip; 0538 and 0539 are held out. `./render.sh` re-renders them from the saved parameters in about a minute.

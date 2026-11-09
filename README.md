@@ -5,8 +5,8 @@ One foam ball, one steel tin that presses it and is pulled away, filmed at 1080p
 
 ```bash
 # needs python3, ffmpeg and the four originals in videos/IMG_053{6,7,8,9}.MOV (not in git, ~157 MB)
-./run_all.sh              # ~20 min: tracking, the three 1D models, evaluations with the saved 3D parameters, demo videos
-./run_all.sh --fit-3d     # + refit all five 3D models (each ~10-20 min)
+./run_all.sh              # ~20 min: tracking, the three 1D models, 3D videos and the evaluation from the saved 3D parameters
+./run_all.sh --fit-3d     # refit all five 3D models (each ~10-20 min) instead of reusing the saved parameters
 ```
 
 Every folder under `tracking/`, `models/` and `evaluation/` has its own `README.md` (formulas, parameters, assumptions, limitations, results), `src/`, `outputs/` and `run.sh`.
@@ -35,12 +35,12 @@ models/
     foam_core_shape_fit/   + outline squareness and width over time                       matches shape, no hop
     foam_core_no_lift/     hop ignored in the fit                                         hops far too high
     foam_core_with_lift/   hop included (weight 4)                                        deep-squeeze hops match
-evaluation/      recovery_time, hop_height, load_cases (flat / point / side / 75 %), real_vs_model
+evaluation/      recovery_time (cross-model comparison)
 shared/          code several models import (3D engine, scenario runner, renderers, clip preparation)
 docs/            assignment PDF, initial plan, write-up of the 1D experiments, glossary
 ```
 
-Family overviews: [models/lumped_1d](models/lumped_1d/README.md), [models/mesh_3d](models/mesh_3d/README.md), [evaluation](evaluation/README.md). Video to share with the team: [evaluation/real_vs_model/outputs](evaluation/real_vs_model/outputs/).
+Family overviews: [models/lumped_1d](models/lumped_1d/README.md), [models/mesh_3d](models/mesh_3d/README.md), [evaluation](evaluation/README.md). Every model folder has real-versus-model videos in its `outputs/` (3D models: training clip 0536 and held-out 0538, 0539 on one clock, t = 0 at release; each also has `render.sh` to re-render them in about a minute).
 
 ## Results
 
@@ -64,14 +64,12 @@ Family overviews: [models/lumped_1d](models/lumped_1d/README.md), [models/mesh_3
 
 Models are within -3 to +14 ms. Two clips pressed equally deep differ by 12 ms in reality, so **this test cannot separate the models**.
 
-**5. [Hop height](evaluation/hop_height/README.md) (mm):** real 7.0, 7.4 (train) and 3.6, 5.2 (test). Without the hop term the model overshoots (50-63 mm after deep squeezes); with it, deep-squeeze hops match (5.9, 8.9 mm) but the shallow-squeeze test clips get no hop (0.0 mm).
-
-**6. [Other loads](evaluation/load_cases/README.md)** (predictions from parameters fitted on flat top presses only; not validated): `evaluation/load_cases/outputs/with_lift/lift_{flat,point,side}.mp4` (flat on top, point force on top, two flat plates from the sides) and `deep_withlift.mp4` (same folder) (75 % press, outside the training range, mesh crumples).
+**5. [Hop height](models/mesh_3d/foam_core_with_lift/README.md) (mm):** real 7.0, 7.4 (train) and 3.6, 5.2 (test). Without the hop term the model overshoots (50-63 mm after deep squeezes); with it, deep-squeeze hops match (5.9, 8.9 mm) but the shallow-squeeze test clips get no hop (0.0 mm).
 
 ## Limitations (read these before relying on any number)
 
 - **The press is an input.** The compressed height and release time come from the video; the models predict what happens after release (and the shape under the loads above). The 2D squeeze demos replay the measured tin-driven height before release.
-- **Not validated beyond top-down flat presses.** The point-force and side-plate videos are extrapolations.
+- **Only top-down flat presses were fitted.** The simulator also supports a point probe and side plates, but no video of those loads exists to test against.
 - **No ball mass was measured**, so stiffness and damping are per unit mass; diameter (6.7 cm) is a rough estimate that sets the pixel scale and the gravity term.
 - **Mass-spring parameters depend on the mesh.** A finer mesh would change `ks`, `kb`, `kr`; a finite-element model with Young's modulus would not.
 - **Tin interaction is mixed into the results.** Friction or suction from the tin may add to the hop and speed up the first frames after release; the tin itself is not tracked.

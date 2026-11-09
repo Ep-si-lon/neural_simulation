@@ -22,4 +22,4 @@ Same as the two-mass model, plus a piecewise-linear stiffening.
 Remaining candidates (untested): the first 1–2 frames after the tin leaves are hand-driven or corrupted by tin glare, so they are not ball dynamics.
 
 ## Run
-`./run.sh` (about 5 min). Code `src/snap_sim.py`. Outputs `outputs/results.txt`, `params.json`.
+`./run.sh` (about 5 min). Code `src/snap_sim.py` (model + fit), `src/demo_snap.py` (real clip next to the fast-snap simulation for the held-out clips). Outputs `outputs/results.txt`, `params.json`, `demo_snap_IMG_0538.mp4`, `demo_snap_IMG_0539.mp4`.

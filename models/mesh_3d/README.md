@@ -21,4 +21,4 @@ All five variants share one engine, `../../shared/ball3d.py`, and one scenario r
 | time step | 4×10⁻⁵ s (explicit integrator; limits how stiff or damped a fit may be) | fixed |
 
 Mass-spring parameters depend on the mesh: refining it would change the fitted values. A finite-element model with a Young's modulus would not have that problem.
-Loads other than the flat top press (point, sides, 75 % press) are predictions only; see `../../evaluation/load_cases`.
+Every model folder has real-versus-model videos in `outputs/` (training clip 0536 and held-out 0538, 0539), re-rendered by its `render.sh`. The engine also supports a point probe and two side plates, but only flat top presses were fitted and tested against video.
