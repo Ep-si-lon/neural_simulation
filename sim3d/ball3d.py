@@ -22,8 +22,8 @@ def icosphere(sub):
     return np.array(v), np.array(f)
 
 class Ball:
-    def __init__(self, R=0.0335, sub=2, ks=3e5, kb=1e5, p0=2e5, cd=30.0, g=9.81, kt=1e7):
-        self.R, self.g, self.ks, self.kb, self.p0, self.cd, self.kt = R, g, ks, kb, p0, cd, kt
+    def __init__(self, R=0.0335, sub=2, ks=3e5, kb=1e5, p0=0.0, cd=30.0, g=9.81, kt=1e7, kr=0.0):
+        self.R, self.g, self.ks, self.kb, self.p0, self.cd, self.kt, self.kr = R, g, ks, kb, p0, cd, kt, kr
         v, f = icosphere(sub); self.x = v * R; self.f = f; self.N = len(v); self.m = 1.0 / self.N
         e = {tuple(sorted(p)) for t in f for p in ((t[0], t[1]), (t[1], t[2]), (t[2], t[0]))}
         self.e = np.array(sorted(e)); opp = {}
@@ -37,7 +37,7 @@ class Ball:
         self.Se = sp.csr_matrix((np.r_[np.ones(E), -np.ones(E)], (np.r_[self.e[:, 0], self.e[:, 1]], np.r_[np.arange(E), np.arange(E)])), shape=(self.N, E))
         self.Sb = sp.csr_matrix((np.r_[np.ones(B), -np.ones(B)], (np.r_[self.b[:, 0], self.b[:, 1]], np.r_[np.arange(B), np.arange(B)])), shape=(self.N, B))
         T = len(f); self.St = sp.csr_matrix((np.ones(3 * T) / 3, (f.ravel(), np.repeat(np.arange(T), 3))), shape=(self.N, T))
-        self.v = np.zeros_like(self.x); self.V0 = self.volume(); self.x[:, 1] += R   # sits on y=0 table
+        self.rl0 = np.linalg.norm(self.x - self.x.mean(0), axis=1).mean(); self.v = np.zeros_like(self.x); self.V0 = self.volume(); self.x[:, 1] += R   # sits on y=0 table
         self.tool = None
 
     def volume(self):
@@ -53,6 +53,10 @@ class Ball:
         a, b_, c = (x[self.f[:, i]] for i in range(3)); nA = np.cross(b_ - a, c - a) / 2          # outward area-weighted normals
         p = self.p0 * self.V0 / max(self.volume(), 1e-9 * self.V0)
         F = self.Se @ fe + self.Sb @ fb + self.St @ (p * nA)
+        if self.kr:                                           # foam core: radial springs to the centroid, no volume conservation, no fluid
+            c = x.mean(0); r = x - c; rl = np.linalg.norm(r, axis=1) + 1e-12; ru = r / rl[:, None]; rr = rl.mean()
+            fr = (-self.kr * (rl - self.rl0) - self.cd * np.einsum('ij,ij->i', v - v.mean(0), ru))[:, None] * ru
+            F += fr - fr.mean(0)                              # internal force: momentum-neutral
         F[:, 1] -= self.g * self.m
         F[:, 1] += np.where(x[:, 1] < 0, -self.kt * x[:, 1] * self.m - 2 * 0.3 * np.sqrt(self.kt) * v[:, 1] * self.m, 0)   # table penalty
         F[:, [0, 2]] -= np.where(x[:, 1] < 0, 5.0, 0)[:, None] * v[:, [0, 2]] * self.m                                 # table friction

@@ -1,4 +1,4 @@
-"""Fit the 3D shell's (ks, kb, p0, cd) to flat-plate press+release clips; predict held-out clips with no refit.
+"""Fit the 3D shell's (ks, kb, kr, cd); kr = foam-core radial spring, no sealed gas to flat-plate press+release clips; predict held-out clips with no refit.
 Scenario per clip: relax -> plate presses quasi-statically to the clip's measured compressed height -> plate removed -> simulate 0.25 s.
 Targets: height(t)/rest, bottom lift(t)/rest, and hold-state width/rest. Run: PYTHONPATH=src:sim3d python -u sim3d/fit3d.py"""
 import sys, json
@@ -12,8 +12,8 @@ DT, SUB = 4e-5, 2
 _relaxed = {}
 
 def scenario(p, c, rec=1e-3):
-    ks, kb, p0, cd = np.exp(p)
-    b = Ball(sub=SUB, ks=ks, kb=kb, p0=p0, cd=cd); b.run(0.08, DT, damp=80); rest = b.shape()[0]
+    ks, kb, kr, cd = np.exp(p)
+    b = Ball(sub=SUB, ks=ks, kb=kb, kr=kr, cd=cd); b.run(0.08, DT, damp=80); rest = b.shape()[0]
     target = rest * c['hc'] / c['rest']
     for i in range(40): b.tool = ('plate', rest - (rest - target) * (i + 1) / 40, 0); b.run(0.0015, DT, damp=80)
     hold = b.shape(); b.tool = None; ts, hs, ls = [0.0], [hold[0] / rest], [0.0]
@@ -32,13 +32,14 @@ def res(p, cs):
     out = []
     for c in cs:
         h, l, wh = pred(p, c)
+        if not (np.all(np.isfinite(h)) and np.all(np.isfinite(l)) and np.isfinite(wh)): h, l, wh = np.full_like(h, 3.0), np.full_like(l, 3.0), 3.0   # unstable sim -> large residual
         out += [(h - c['h'] / c['rest']), (l - c['lift'] / c['rest']), [3 * (wh - hold_width_ratio(c))]]
     return np.concatenate([np.ravel(o) for o in out])
 
-def fit(cs, starts=((3e4, 3e3, 3e3, 5.0), (3e5, 3e4, 3e4, 30.0))):
+def fit(cs, starts=((3e4, 3e3, 3e3, 5.0), (3e5, 3e4, 3e4, 30.0), (3e3, 300, 1e4, 15.0))):
     best = None
     for s in starts:
-        r = least_squares(res, np.log(s), args=(cs,), bounds=(np.log([1e2, 1e1, 1e1, 0.1]), np.log([1e8, 1e8, 1e8, 1e3])), diff_step=5e-2, loss='soft_l1', f_scale=0.03, max_nfev=30)
+        r = least_squares(res, np.log(s), args=(cs,), bounds=(np.log([1e2, 1e1, 1e1, 0.1]), np.log([2e6, 2e6, 2e6, 50.0])), diff_step=5e-2, loss='soft_l1', f_scale=0.03, max_nfev=30)
         print('   start', s, 'cost', round(r.cost, 4), 'params', np.exp(r.x).round(1), flush=True)
         if best is None or r.cost < best.cost: best = r
     return best.x

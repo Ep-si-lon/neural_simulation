@@ -1,7 +1,8 @@
 split: train 0536+0537 -> test 0538, 0539
-   start (30000.0, 3000.0, 3000.0, 5.0) cost 1.2989 params [3.58796e+04 3.30070e+03 2.81840e+03 6.00000e+00]
-   start (300000.0, 30000.0, 30000.0, 30.0) cost 0.3049 params [6.8528e+03 8.2710e+02 2.5100e+01 7.0000e-01]
-  IMG_0536 (train): height RMSE 12.9%  lift RMSE 5.3%  hold width sim 1.232 vs measured 1.102 (x rest)
-  IMG_0537 (train): height RMSE 13.1%  lift RMSE 4.6%  hold width sim 1.260 vs measured 1.096 (x rest)
-  IMG_0538 (TEST): height RMSE 10.0%  lift RMSE 4.1%  hold width sim 1.122 vs measured 1.072 (x rest)
-  IMG_0539 (TEST): height RMSE 10.0%  lift RMSE 4.7%  hold width sim 1.122 vs measured 1.059 (x rest)
+   start (30000.0, 3000.0, 3000.0, 5.0) cost 0.1261 params [127.8 320.5 778.3  18.7]
+   start (300000.0, 30000.0, 30000.0, 30.0) cost 0.3238 params [100.   10.  419.8   0.7]
+   start (3000.0, 300, 10000.0, 15.0) cost 0.1276 params [1473.8   31.6  753.5   19. ]
+  IMG_0536 (train): height RMSE 7.7%  lift RMSE 3.7%  hold width sim 1.073 vs measured 1.102 (x rest)
+  IMG_0537 (train): height RMSE 7.8%  lift RMSE 4.8%  hold width sim 1.076 vs measured 1.096 (x rest)
+  IMG_0538 (TEST): height RMSE 6.3%  lift RMSE 2.4%  hold width sim 1.056 vs measured 1.072 (x rest)
+  IMG_0539 (TEST): height RMSE 6.2%  lift RMSE 3.2%  hold width sim 1.056 vs measured 1.059 (x rest)

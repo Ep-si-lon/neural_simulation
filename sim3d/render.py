@@ -37,8 +37,8 @@ def draw(ball, tool, az, el, label):
     cv2.putText(img, label, (8, 22), cv2.FONT_HERSHEY_SIMPLEX, .5, (20, 20, 20), 1, cv2.LINE_AA); return img
 
 def main(mode):
-    ks, kb, p0, cd = json.load(open('sim3d/params.json'))['split']
-    b = Ball(sub=SUB, ks=ks, kb=kb, p0=p0, cd=cd); b.cx = b.cz = 0.0; b.run(0.08, DT, damp=80); rest = b.shape()[0]
+    ks, kb, kr, cd = json.load(open('sim3d/params.json'))['split']
+    b = Ball(sub=SUB, ks=ks, kb=kb, kr=kr, cd=cd); b.cx = b.cz = 0.0; b.run(0.08, DT, damp=80); rest = b.shape()[0]
     out = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'bgr24', '-s', f'{2*PX}x{PX+30}', '-r', '30', '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', f'sim3d/demo_{mode}.mp4'], stdin=subprocess.PIPE)
     t = [0.0]
     def frame(phase):
