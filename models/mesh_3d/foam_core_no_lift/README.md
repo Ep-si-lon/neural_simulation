@@ -21,4 +21,4 @@ As `foam_core_height_fit`. The edge stiffness sits on its bound, so the paramete
 **Videos** (`outputs/real_vs_3d_IMG_0536|0538|0539.mp4`): real clip, the model's side view and its oblique view on one clock (time zero = the tin separates; the window starts just before the tin begins to retreat; slowed 8x). 0536 is a training clip; 0538 and 0539 are held out. `./render.sh` re-renders them from the saved parameters in about a minute.
 
 ## Run
-`./run.sh` (fit about 20 min, then videos; `TRACKER=sam2`). Code `src/fit3d_recovery.py`. Outputs `outputs/params_3d.json`, `fit3d_log.txt`, `outputs/archive_v1_instant_release/`.
+`./run.sh` (fit about 20 min, then videos; `TRACKER=sam2`). Code `src/fit3d_recovery.py`. Outputs `outputs/params_3d.json`, `fit3d_log.txt`, [archive/v1_instant_release](../../../archive/v1_instant_release/).

@@ -35,4 +35,4 @@ One vertical degree of freedom pair; homogeneous spring; table and plate are sti
 It beats the plain exponential on every clip (skill +0.47 to +0.72). With the earlier, wrong protocol (instant removal at the mid-rise frame) the same model reported 6-8 %; that was an artefact (see `docs/correction_release_definition.md`).
 
 ## Run
-`./run.sh` (about 6 min). Code: `src/sim.py` (model, fit, leave-one-out), `src/demo_sim.py` (real clip next to the ellipsoid). Outputs: `outputs/sim_results.txt`, `sim_params.json`, `demo_squeeze_IMG_0538.mp4`, `demo_squeeze_IMG_0539.mp4`; `outputs/archive_v1_instant_release/` holds the earlier run.
+`./run.sh` (about 6 min). Code: `src/sim.py` (model, fit, leave-one-out), `src/demo_sim.py` (real clip next to the ellipsoid). Outputs: `outputs/sim_results.txt`, `sim_params.json`, `demo_squeeze_IMG_0538.mp4`, `demo_squeeze_IMG_0539.mp4`; [archive/v1_instant_release](../../../archive/v1_instant_release/) holds the earlier run.

@@ -2,7 +2,7 @@
 
 The second way to explain the video: represent the ball as a 3D surface mesh (an icosphere with 162 nodes, 480 edges), apply the press as a contact tool and simulate it with gravity and a table.
 All five variants share one engine, `../../shared/ball3d.py`, and one scenario runner, `../../shared/scenario3d.py`: relax, press quasi-statically to the clip's measured compressed height, **retreat the plate along the measured tin trajectory** (the corrected protocol, see [docs/correction_release_definition.md](../../docs/correction_release_definition.md)), release, simulate 0.25 s. They differ in the internal physics (sealed gas vs foam core) and in what the fit is asked to match.
-Everything was refitted on the SAM 2 measurements after the correction; earlier results are in each `outputs/archive_v1_instant_release/`.
+Everything was refitted on the SAM 2 measurements after the correction; earlier results are in [../../archive/v1_instant_release/](../../archive/v1_instant_release/).
 
 | Model | Internal physics | Fit targets | Held-out height error (0538 / 0539) | Outcome |
 | --- | --- | --- | --- | --- |

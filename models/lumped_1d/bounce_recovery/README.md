@@ -35,4 +35,4 @@ Rigid-body hop; instantaneous bounce apart from `t_c`; exponential height recove
 It beats both baselines on 3 of 4 clips. **Hop** (peak lift of the bottom edge, mm), model against real: 7.1 / 6.5 / 2.5 / 4.7 against 7.1 / 7.5 / 3.3 / 5.4, the closest of any model.
 
 ## Run
-`./run.sh` (about 2 min; `TRACKER=sam2`). Code: `src/fit.py` (model, fit, evaluation), `src/demo.py` (real clip next to the ellipsoid proxy). Outputs: `outputs/results.txt`, `loo_predictions.png`, `demo_IMG_0538.mp4`, `demo_IMG_0539.mp4`; `outputs/archive_v1_instant_release/` holds the earlier colour-tracker run.
+`./run.sh` (about 2 min; `TRACKER=sam2`). Code: `src/fit.py` (model, fit, evaluation), `src/demo.py` (real clip next to the ellipsoid proxy). Outputs: `outputs/results.txt`, `loo_predictions.png`, `demo_IMG_0538.mp4`, `demo_IMG_0539.mp4`; [archive/v1_instant_release](../../../archive/v1_instant_release/) holds the earlier colour-tracker run.

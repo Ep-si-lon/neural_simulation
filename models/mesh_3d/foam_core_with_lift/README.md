@@ -21,4 +21,4 @@ As `foam_core_height_fit`. Tin friction or suction may account for part of the r
 **Videos** (`outputs/real_vs_3d_IMG_0536|0538|0539.mp4`): real clip, the model's side view and its oblique view on one clock (time zero = the tin separates; the window starts just before the tin begins to retreat; slowed 8x). 0536 is a training clip; 0538 and 0539 are held out. `./render.sh` re-renders them from the saved parameters in about a minute.
 
 ## Run
-`./run.sh` (fit about 20 min, then videos and the hop check; `TRACKER=sam2`). Code `src/fit3d_lift.py`, `src/hop_check.py`. Outputs `outputs/params_3d_lift.json`, `fit3d_lift_log.txt`, `hop_check.md`, `hops.png`, `outputs/archive_v1_instant_release/`.
+`./run.sh` (fit about 20 min, then videos and the hop check; `TRACKER=sam2`). Code `src/fit3d_lift.py`, `src/hop_check.py`. Outputs `outputs/params_3d_lift.json`, `fit3d_lift_log.txt`, `hop_check.md`, `hops.png`, [archive/v1_instant_release](../../../archive/v1_instant_release/).

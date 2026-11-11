@@ -1,11 +1,12 @@
 # Family 3: continuum models (the ball as a solid), built on NVIDIA Warp and PyTorch
 
 The third way to explain the video, and the one the research literature uses: treat the ball as a **volume of elastic material** with physical constants (Young's modulus E, Poisson ratio ν, density ρ) instead of a spring mesh.
-Both models use libraries instead of hand-written solvers: [NVIDIA Warp](https://nvidia.github.io/warp/) for the simulation (differentiable, GPU) and PyTorch for the fitting loop. Fitted on the SAM 2 measurements with the corrected protocol (the tin retreats along its measured trajectory; see [docs/correction_release_definition.md](../../docs/correction_release_definition.md)).
+These models use libraries instead of hand-written solvers: [NVIDIA Warp](https://nvidia.github.io/warp/) for the simulation (differentiable, GPU) and PyTorch for the fitting loop. Fitted on the SAM 2 measurements with the corrected protocol (the tin retreats along its measured trajectory; see [docs/correction_release_definition.md](../../docs/correction_release_definition.md)).
 
 | Model | Method | What it is for | Fitted? | Held-out height error (0538 / 0539) |
 | --- | --- | --- | --- | --- |
 | [fem_axisymmetric_warp](fem_axisymmetric_warp/) | finite elements on the 2D slice, revolved around the vertical axis | the flat-plate press: smooth round ball; E = 38 kPa, ν = 0.10, damping, friction | yes (PyTorch + Warp tape, on 0536+0537) | 1.9 / 1.4 % |
+| [fem_relative_damping_hop](fem_relative_damping_hop/) | the same finite elements with damping relative to the centre of mass (×16) | a ball that also hops like the real one; lowest height error of all models | no new fit: FEM material, one damping multiplier chosen on the training clips | 1.6 / 1.3 % |
 | [mpm_3d_warp](mpm_3d_warp/) | 3D material point method, 80,000 particles | an independent solver for the same material, plus point and side loads | no: FEM material; damping calibrated on the training clips | 2.3 / 1.9 % |
 
 Plain exponential: 3.1 / 3.4 %. **What this family adds is not a smaller height error** (the 1D and mesh models reach 1.1-2.0 % too); it is physical constants that do not depend on the discretisation, a smooth round ball that reproduces the outline, and a model that extends to loads other than the flat press (unvalidated). See [evaluation/model_comparison](../../evaluation/model_comparison/README.md).

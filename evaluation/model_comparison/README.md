@@ -1,6 +1,6 @@
 # Comparing every model, on the same footing
 
-All 12 models (and the plain-exponential and stay-at-rest baselines) are run with their saved parameters and scored against the **same SAM 2 measurements** of the real clips. Models were fitted on 0536 and 0537 (deep squeezes, 36-41 % of height) and are tested on 0538 and 0539 (shallow squeezes, 62-63 %) with no refit. Time zero is the **separation frame**, when the ball leaves the tin; every model is driven by the measured tin retreat before that (corrected protocol, see [docs/correction_release_definition.md](../../docs/correction_release_definition.md)).
+All 13 models (and the plain-exponential and stay-at-rest baselines) are run with their saved parameters and scored against the **same SAM 2 measurements** of the real clips. Models were fitted on 0536 and 0537 (deep squeezes, 36-41 % of height) and are tested on 0538 and 0539 (shallow squeezes, 62-63 %) with no refit. Time zero is the **separation frame**, when the ball leaves the tin; every model is driven by the measured tin retreat before that (corrected protocol, see [docs/correction_release_definition.md](../../docs/correction_release_definition.md)).
 Run `./run.sh` (about 5 min). Full tables: [outputs/results_tables.md](outputs/results_tables.md); numbers in `outputs/metrics.json`.
 
 ## Figures (`outputs/`)

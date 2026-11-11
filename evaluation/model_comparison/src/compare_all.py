@@ -95,7 +95,7 @@ for j in range(V.shape[1]):
 fig, ax = plt.subplots(figsize=(11, 6.2)); ax.imshow(np.ma.masked_invalid(rank), cmap='RdYlGn_r', vmin=0, vmax=1, aspect='auto')
 for i in range(V.shape[0]):
     for j in range(V.shape[1]): ax.text(j, i, '-' if np.isnan(V[i, j]) else (f'{-V[i, j]:+.2f}' if j == 1 else (f'{V[i, j]:.1f}' if j != 3 else f'{V[i, j]:.3f}')), ha='center', va='center', fontsize=8)
-ax.set_xticks(range(len(cols))); ax.set_xticklabels([c[0] for c in cols], fontsize=8); ax.set_yticks(range(len(keys))); ax.set_yticklabels([INFO[k][0] for k in keys], fontsize=8); ax.set_title('Scorecard on the held-out clips (green = better rank in that column)')
+ax.set_xticks(range(len(cols))); ax.set_xticklabels([c[0] for c in cols], fontsize=8, rotation=20, ha='right'); ax.set_yticks(range(len(keys))); ax.set_yticklabels([INFO[k][0] for k in keys], fontsize=8); ax.set_title('Scorecard on the held-out clips (green = better rank in that column)')
 plt.tight_layout(); plt.savefig(f'{OUT}/fig6_scorecard.png', dpi=85); plt.close()
 
 # gallery of the model panels from the existing videos (held-out clip 0538): pressed state and 32 ms after release

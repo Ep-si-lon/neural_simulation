@@ -32,4 +32,4 @@ Foam is a radial spring field (no shear); skin and core homogeneous; per-unit-ma
 **Videos** (`outputs/real_vs_3d_IMG_0536|0538|0539.mp4`): real clip, the model's side view and its oblique view on one clock (time zero = the tin separates; the window starts just before the tin begins to retreat; slowed 8x). 0536 is a training clip; 0538 and 0539 are held out. `./render.sh` re-renders them from the saved parameters in about a minute.
 
 ## Run
-`./run.sh` (fit about 15 min, then videos; `TRACKER=sam2`). Code `src/fit3d.py`. Outputs `outputs/results.txt`, `params.json`, the earlier `demo_flat.mp4`, `demo_point.mp4` (old renderer) and `outputs/archive_v1_instant_release/`.
+`./run.sh` (fit about 15 min, then videos; `TRACKER=sam2`). Code `src/fit3d.py`. Outputs `outputs/results.txt`, `params.json`, the earlier `demo_flat.mp4`, `demo_point.mp4` (old renderer) and [archive/v1_instant_release](../../../archive/v1_instant_release/).

@@ -19,7 +19,7 @@ Every model was started at the mid-rise frame as if the ball were still fully pr
 - Every simulator (two-mass and fast-snap ODEs, the three 3D mesh scenario runners, the FEM, the MPM) moves a kinematic plate along that trajectory, then removes it at separation. The ball's free recovery is then **predicted**, not replayed; only the tin's motion is an input.
 - Evidence the initial condition is now right: for IMG_0538, with the *old* parameters and the new input, the two-mass model reaches 0.812 and the 3D foam mesh 0.815 of rest height at separation, against 0.811 measured.
 - All models were **refitted on the SAM 2 measurements** (see `tracking/README.md` for why the colour tracker's pressed top edge is biased high), so every model now sees the same data.
-- The old outputs are kept in each model's `outputs/archive_v1_instant_release/` (and `*_instant_release.*` for the continuum models) for transparency; the axisymmetric FEM with the old protocol is kept as an ablation model in the comparison.
+- The old outputs are kept in [archive/v1_instant_release/](../archive/v1_instant_release/) (and `*_instant_release.*` for the continuum models) for transparency; the axisymmetric FEM with the old protocol is kept as an ablation model in the comparison.
 
 ## What remains valid
 Tracking and its SAM 2 comparison, the time base (verified with gravity), the hop analysis after the first apex (bounce model), and the conclusions about the sealed-gas model's bulge. Everything that depended on the release frame (fitted stiffness and damping, recovery times, rankings) was recomputed; see `evaluation/model_comparison`.
