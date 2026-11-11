@@ -2,7 +2,8 @@ import numpy as np
 from scipy.signal import medfilt
 from scipy.optimize import least_squares
 
-TRACK_OUT = 'tracking/outputs'      # scripts run from the repo root
+import os
+TRACK_OUT = 'tracking/outputs_sam2' if os.environ.get('TRACKER') == 'sam2' else 'tracking/outputs'   # TRACKER=sam2 switches every model to the SAM 2 measurements (scripts run from the repo root)
 W, H = 1920, 1080                  # video frame size
 CLIPS = ['IMG_0536', 'IMG_0537', 'IMG_0538', 'IMG_0539']
 WIN_S = 0.30

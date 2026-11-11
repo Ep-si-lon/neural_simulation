@@ -1,0 +1,8 @@
+MPM material from the FEM fit: E 35352 Pa, nu 0.078, alpha 2200 1/s, friction plate 1.14 table 1.65, density 55.0 kg/m3 (estimate)
+  IMG_0536 (train): height RMSE 3.5% (exp baseline 5.6%)  t95 MPM 33 ms vs real 37 ms  pressed width MPM 1.106x vs real 1.102x  [79711 particles]
+  IMG_0537 (train): height RMSE 3.8% (exp baseline 5.5%)  t95 MPM 33 ms vs real 42 ms  pressed width MPM 1.128x vs real 1.096x  [79711 particles]
+  IMG_0538 (TEST): height RMSE 3.7% (exp baseline 4.1%)  t95 MPM 29 ms vs real 25 ms  pressed width MPM 1.033x vs real 1.072x  [79711 particles]
+  IMG_0539 (TEST): height RMSE 2.1% (exp baseline 3.9%)  t95 MPM 25 ms vs real 13 ms  pressed width MPM 1.033x vs real 1.059x  [79711 particles]
+  load flat: flat press to 40 % of the height (60 % compression); min height 31.6 mm, max width 73.6 mm
+  load point: point probe (6 mm) pressed 45 % of the height; min height 54.5 mm, max width 67.7 mm
+  load side: two flat plates squeezing the width by 40 %; min height 66.2 mm, max width 66.4 mm

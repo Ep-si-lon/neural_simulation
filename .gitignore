@@ -4,3 +4,4 @@ videos/
 WhatsApp*/
 __pycache__/
 tracking/outputs/debug/
+.venv-sim/

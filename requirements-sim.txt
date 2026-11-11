@@ -1,0 +1,8 @@
+huggingface_hub==2.4.0
+matplotlib==3.11.2
+numpy==2.5.4
+opencv-python-headless==5.0.0.93
+sam2==1.1.0
+scipy==1.18.1
+torch==2.15.0
+warp-lang==1.19.0

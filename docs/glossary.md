@@ -32,3 +32,12 @@
 - **Baseline:** a simple guess the model must beat. "Stay at rest" is the dumbest; "single exponential" says the ball just eases back with no physics.
 - **Nonlinear least squares:** the search method that tunes the numbers to minimise the error. Same maths as ML training, but with only 3-4 numbers and hand-written physics, so I call it system identification, not ML.
 - **Replay vs prediction:** replay copies the measured motion back; prediction runs the model from physics and the inputs only. The measured pressed height and release time are inputs.
+
+## Continuum models and tracking
+- **Young's modulus (E):** how stiff the material is, in pascals (force per area for a given stretch). Foam is soft: tens of kilopascals.
+- **Poisson ratio (nu):** how much a material bulges sideways when squashed. Rubber is near 0.5 (keeps its volume); foam is near 0 (just compresses).
+- **FEM (finite elements):** the ball is cut into small pieces that each store elastic energy; the forces come from that energy. Here one 2D slice is revolved around the vertical axis.
+- **MPM (material point method):** the ball is a cloud of particles; each step they hand their motion to a background grid, the physics runs on the grid, and it is handed back. No mesh to tangle, so it copes with big squeezes.
+- **NVIDIA Warp / PyTorch:** Warp is a library that runs the simulation on the GPU and can differentiate through it; PyTorch drives the optimizer that adjusts the parameters.
+- **SAM 2:** Meta's pretrained model that cuts the ball out of every video frame. It is the only neural network in the project.
+- **Rayleigh (mass-proportional) damping:** a drag proportional to velocity. It makes the recovery overdamped (no wobble) but also stops the whole ball from hopping.
