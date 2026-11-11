@@ -77,3 +77,9 @@ Held-out height error 1.6 / 1.3 % (test mean 1.4 %), the lowest of every model; 
 - `outputs/hop_experiment_lift_IMG_0538.png`, `..._0536.png`: bottom-edge lift against time, real vs each variant.
 - `outputs/real_vs_fem_hop16_IMG_0536.mp4`, `..._0538.mp4`, `..._0539.mp4`: real | FEM ×16 side | oblique.
 - `outputs/hop_scan.json`, `hop_scan.png`, `hop_experiment.txt`.
+- **Multipliers 14, 14.5, 15, 15.5, 16 side by side** (`python src/render_hop_experiment.py CLIP 14 14.5 15 15.5 16`; summary plot `src/plot_fine_scan.py`):
+  - `outputs/hop_experiment_14to16_IMG_0536.mp4`, `..._0537.mp4`, `..._0538.mp4`, `..._0539.mp4`: real clip beside the five variants (zoomed out, time zero = separation, slowed 8x).
+  - `outputs/hop_curves_14to16_IMG_*.png`: height and hop-lift against time, real vs the five variants, per clip.
+  - `outputs/hop_experiment_lift_14to16_IMG_*.png`: the same lift on a log-like axis.
+  - `outputs/hop_fine_scan_14to16.png`: height error, 95 % recovery time, hop and score against the multiplier for all four clips.
+  - What the curves show: the five variants differ mainly in hop size (about 3 mm of spread on every clip) and only slightly in the height curve; on 0538 all of them hop 8-11 mm against 3.3 real and begin recovering faster than the real ball over the first 20 ms.
