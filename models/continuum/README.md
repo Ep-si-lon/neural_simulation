@@ -14,7 +14,7 @@ Plain exponential: 3.1 / 3.4 %. **What this family adds is not a smaller height 
 - Homogeneous, isotropic, compressible neo-Hookean solid (foam-like: ν is small and volume is not conserved).
 - **Density ρ = 55 kg/m³, an estimate** (10 g and 6.7 cm would give 63). Only E/ρ is identified from the video; E in pascals scales linearly with the assumed density.
 - The plate follows the measured compressed height, then the measured tin retreat; the squeeze is simulated in 0.12 s with extra numerical drag so it is quasi-static.
-- Damping is mass-proportional (Rayleigh) on the absolute velocity: it gives the overdamped recovery and **suppresses the hop**. Physical Kelvin-Voigt viscosity would need time steps around 10⁻⁷ s with this mesh.
+- Damping is mass-proportional (Rayleigh) on the absolute velocity: it gives the overdamped recovery and **suppresses the hop**. Damping relative to the centre of mass was tested and does not fix it (it hops 25-356 mm, and recovers too fast when strong enough to tame the hop; see the FEM README). Physical Kelvin-Voigt viscosity would need implicit stepping or time steps around 10⁻⁷ s with this mesh.
 - Tin and table are rigid; friction is Coulomb (fitted).
 
 ## Environment

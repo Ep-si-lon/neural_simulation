@@ -1,0 +1,6 @@
+real hop (mm): {'IMG_0536': 7.1, 'IMG_0537': 7.5, 'IMG_0538': 3.3, 'IMG_0539': 5.4}
+absolute damping (as fitted)       0536: rmse 3.2% t95 30ms hop 0.0mm  0537: rmse 3.3% t95 32ms hop 0.0mm  0538: rmse 2.0% t95 24ms hop 0.0mm  0539: rmse 1.5% t95 24ms hop 0.0mm
+centre-of-mass-relative, alpha x1  0536: rmse 5.3% t95 4ms hop 321.2mm  0537: rmse 6.3% t95 4ms hop 356.0mm  0538: rmse 3.4% t95 4ms hop 127.5mm  0539: rmse 2.8% t95 4ms hop 125.6mm
+relative, alpha x2                 0536: rmse 5.0% t95 6ms hop 210.5mm  0537: rmse 6.0% t95 6ms hop 232.6mm  0538: rmse 3.2% t95 4ms hop 91.2mm  0539: rmse 2.7% t95 4ms hop 89.5mm
+relative, alpha x4                 0536: rmse 4.4% t95 8ms hop 111.1mm  0537: rmse 5.3% t95 8ms hop 121.1mm  0538: rmse 3.0% t95 6ms hop 55.7mm  0539: rmse 2.6% t95 6ms hop 54.4mm
+relative, alpha x8                 0536: rmse 3.3% t95 16ms hop 40.4mm  0537: rmse 4.0% t95 16ms hop 43.3mm  0538: rmse 2.4% t95 10ms hop 26.8mm  0539: rmse 2.0% t95 10ms hop 25.1mm

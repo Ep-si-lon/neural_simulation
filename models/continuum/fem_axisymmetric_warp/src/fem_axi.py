@@ -16,6 +16,11 @@ L0, L1 = 3, 45                           # levels used in the loss (the end leve
 NARC = len(half_disc_mesh(R, 0.0015)[2])  # boundary nodes along the profile (compile-time constant)
 
 @wp.kernel
+def k_com(n: int, v_all: wp.array2d(dtype=wp.vec2), mass: wp.array(dtype=float), inv_m: float, vcm: wp.array(dtype=wp.vec2)):
+    i = wp.tid()
+    wp.atomic_add(vcm, n, mass[i] * inv_m * v_all[n, i])
+
+@wp.kernel
 def k_elem(n: int, x_all: wp.array2d(dtype=wp.vec2), tri: wp.array(dtype=wp.vec3i), dminv: wp.array(dtype=wp.mat22), rc0: wp.array(dtype=float),
            prm: wp.array(dtype=float), f_all: wp.array2d(dtype=wp.vec2)):
     e = wp.tid()
@@ -44,7 +49,7 @@ def k_elem(n: int, x_all: wp.array2d(dtype=wp.vec2), tri: wp.array(dtype=wp.vec3
 
 @wp.kernel
 def k_node(n: int, dt: float, x_all: wp.array2d(dtype=wp.vec2), v_all: wp.array2d(dtype=wp.vec2), f_all: wp.array2d(dtype=wp.vec2),
-           mass: wp.array(dtype=float), axis: wp.array(dtype=int), prm: wp.array(dtype=float),
+           vcm: wp.array(dtype=wp.vec2), rel: float, mass: wp.array(dtype=float), axis: wp.array(dtype=int), prm: wp.array(dtype=float),
            plate_z: wp.array(dtype=float), plate_v: wp.array(dtype=float), mode: wp.array(dtype=int), gam: float):
     i = wp.tid()
     x = x_all[n, i]; v = v_all[n, i]
@@ -52,7 +57,7 @@ def k_node(n: int, dt: float, x_all: wp.array2d(dtype=wp.vec2), v_all: wp.array2
     d = prm[2]
     if mode[n] == 0:
         d = gam                                        # numerical drag while squeezing (quasi-static)
-    a = a - d * v
+    a = a - d * (v - rel * vcm[n])                      # rel = 1: damp only the motion relative to the centre of mass (the hop is kept)
     vn = v + dt * a
     xn = x + dt * vn
     if xn[1] < 0.0:                                    # table: exact kinematic contact, Coulomb friction limited by the estimated reaction
@@ -141,7 +146,7 @@ class FEM:
         mode[n_sq + n_hold:] = 1
         return dict(dt=dt, n=n, n_sq=n_sq, n_hold=n_hold, n_ret=n_ret, n_sep=n_sq + n_hold + n_ret, n_rel=n_rel, plate=plate, pv=pv, mode=mode, z0=z0, h_hold=h_hold, gam=gam, t_sq=t_sq, t_hold=t_hold)
 
-    def run(self, prm, plan, events=None, tape=False):
+    def run(self, prm, plan, events=None, tape=False, rel=0.0):
         """prm = [mu, lam, alpha, mu_plate, mu_table] (numpy or warp array). Returns (x_all warp array, loss array, prm array, tape)."""
         d, n, N = self.dev, plan['n'], self.N
         x_np = np.zeros((n + 1, N, 2), np.float32); x_np[0] = self.X
@@ -152,10 +157,12 @@ class FEM:
         mode = wp.array(plan['mode'], dtype=int, device=d); dt = plan['dt']
         loss = wp.zeros(1, dtype=float, device=d, requires_grad=tape)
         tp = wp.Tape() if tape else None
+        vcm = wp.zeros(n + 1, dtype=wp.vec2, device=d, requires_grad=tape); inv_m = float(1.0 / self.mass.sum())
         def steps():
             for s in range(n):
+                if rel: wp.launch(k_com, dim=N, inputs=[s, v_all, self.w_mass, inv_m, vcm], device=d)
                 wp.launch(k_elem, dim=self.E, inputs=[s, x_all, self.w_tri, self.w_dminv, self.w_rc0, prm_w, f_all], device=d)
-                wp.launch(k_node, dim=N, inputs=[s, dt, x_all, v_all, f_all, self.w_mass, self.w_axis, prm_w, plate, pv, mode, plan['gam']], device=d)
+                wp.launch(k_node, dim=N, inputs=[s, dt, x_all, v_all, f_all, vcm, float(rel), self.w_mass, self.w_axis, prm_w, plate, pv, mode, plan['gam']], device=d)
             if events is not None:
                 ne = len(events['step']); wsim = wp.zeros((ne, L1 - L0), dtype=float, device=d, requires_grad=tape)
                 wp.launch(k_outline, dim=(ne, L1 - L0), inputs=[x_all, self.w_arc, self.top, self.bot, events['w_step'], wsim], device=d)

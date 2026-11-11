@@ -78,12 +78,12 @@ def fit(fem, names, iters=45, lr=0.12, th0=None, log=print):
 
 OUT = 'models/continuum/fem_axisymmetric_warp/outputs'
 
-def simulate_clip(fem, name, p, use_tin=True):
+def simulate_clip(fem, name, p, use_tin=True, rel=0.0):
     """Forward run (no tape) with fitted parameters p; returns plan and per-step arrays of the top/bottom axis nodes and the outline-relevant nodes."""
     cd = clip_data(name); mu, lam = float(p[0]), float(p[1]); cw = np.sqrt((lam + 2 * mu) / RHO)
     if not use_tin: cd['tin'] = None                                      # older protocol: instant removal at the separation frame
     dt = safe_dt(cw, float(p[2])); plan = fem.plan_with_dt(dt, cd['h_hold'], tin=cd['tin'])
-    x_all, _, _, _ = fem.run(np.asarray(p, np.float32), plan, None, tape=False)
+    x_all, _, _, _ = fem.run(np.asarray(p, np.float32), plan, None, tape=False, rel=rel)
     return cd, plan, x_all.numpy()
 
 def recovery_time(t, h, rest, thr=0.95):

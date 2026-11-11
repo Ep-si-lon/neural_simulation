@@ -27,7 +27,7 @@ Reference position `X = (R, Z)`, current position `x = (r, z)`; the hoop directi
 E scales linearly with the assumed density. Fitted with Adam in PyTorch on 0536+0537 (45 steps, sigmoid bounds); Warp's tape gradients agree with finite differences to 3-4 digits.
 
 ## Assumptions and limitations
-- **No hop** (mass-proportional damping suppresses it; physical Kelvin-Voigt viscosity would need time steps near 10⁻⁷ s on this mesh). Friction 1.8 is large and may stand in for tin suction.
+- **No hop.** Mass-proportional damping on the absolute velocity suppresses it. Damping only the motion relative to the centre of mass keeps the hop but gives 126-356 mm at the fitted strength and still 25-43 mm at 8x the strength, with recovery twice as fast as the real ball (`src/hop_experiment.py`, `outputs/hop_experiment.txt`): the compressed foam stores far more energy than the real ball releases as a hop, so a single damping number cannot match both. The proper remedy is internal viscoelastic (Kelvin-Voigt) damping, which needs implicit time stepping or time steps near 10⁻⁷ s on this mesh. Friction 1.8 is large and may stand in for tin suction.
 - Axisymmetric: flat top press only (point and side loads need `../mpm_3d_warp`).
 - **Pressed width too wide on the deep presses** (1.13 / 1.16× against 1.077×); close on the shallow ones (1.053 / 1.055× against 1.043×).
 - Tin trajectory (measured) is an input; E depends on the density estimate; ν and friction are weakly separated from a single side view.
