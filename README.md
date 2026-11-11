@@ -36,6 +36,7 @@ models/
     foam_core_with_lift/   hop included (weight 4)
   continuum/     Family 3: the ball as an elastic solid (E, nu), Warp + PyTorch, SAM 2 data
     fem_axisymmetric_warp/ finite elements on the 2D slice, revolved into a smooth ball
+    fem_relative_damping_hop/ the same FEM with damping relative to the centre of mass (x16): keeps the hop
     mpm_3d_warp/           3D material point method, FEM material, point and side loads
 evaluation/      model_comparison (all models, every aspect); recovery_time (superseded)
 shared/          code several models import (3D engine, scenario runner, renderers, clip preparation)
@@ -54,7 +55,7 @@ Height error after separation (RMSE, % of ball height) on the **held-out clips**
 | **axisymmetric FEM (Warp)** | **1.7 %** | +0.46 | 24 / 24 | E = 38 kPa, ν = 0.10; smooth round ball; reproduces the outline |
 | foam core, shape fit (mesh) | 1.9 % | +0.42 | 16 / 16 | recovers too fast |
 | foam core, with-lift (mesh) | 2.0 % | +0.40 | 16 / 15 | hop on deep presses |
-| **axisymmetric FEM, damping relative to centre of mass ×16** | **1.4 %** | +0.62 | 20 / 20 | lowest height error; keeps a hop (4-8 mm vs real 3-7); 95 % recovery slightly fast on test clips; α chosen on training clips only (hop_scan) |
+| **[FEM hop model](models/continuum/fem_relative_damping_hop/README.md): damping relative to centre of mass ×16** | **1.4 %** | +0.62 | 20 / 20 | lowest height error; keeps a hop (4-8 mm vs real 3-7); 95 % recovery slightly fast on test clips; α chosen on training clips only (hop_scan) |
 | **3D MPM (Warp), FEM material** | 2.1 % | +0.38 | 27 / 27 | point and side loads (unvalidated) |
 | foam core, height fit (mesh) | 3.2 % | +0.20 | 11 / 10 | closest hop of the meshes |
 | 3D gas shell | 3.9 % | 0.00 | 22 / 9 | fit stalled; rings |

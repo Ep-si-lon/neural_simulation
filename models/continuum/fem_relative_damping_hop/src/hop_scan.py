@@ -5,10 +5,11 @@ import numpy as np
 sys.path[:0] = ['shared', 'tracking/src', 'models/continuum/fem_axisymmetric_warp/src']
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 from fem_axi import FEM
-from fit_fem import simulate_clip, OUT
+from fit_fem import simulate_clip
+OUT = 'models/continuum/fem_relative_damping_hop/outputs'; PARAMS = 'models/continuum/fem_axisymmetric_warp/outputs/params_fem.json'
 from clip_prep import prep
 
-P = json.load(open(f'{OUT}/params_fem.json')); base = np.array(P['prm']); fem = FEM(); tg = np.arange(0, 0.25, 0.002)
+P = json.load(open(PARAMS)); base = np.array(P['prm']); fem = FEM(); tg = np.arange(0, 0.25, 0.002)
 CL = ['IMG_0536', 'IMG_0537', 'IMG_0538', 'IMG_0539']; TRAIN = CL[:2]; cs = {n: prep(n) for n in CL}; MULTS = [8, 12, 16, 24, 32, 48]
 real_hop = {n: float(np.nanmax(cs[n]['lift'] / cs[n]['rest'] * 67)) for n in CL}
 def t95(t, h):

@@ -32,7 +32,7 @@ def run_fem(P, use_tin, rd=0.0, mult=1.0):
     return out
 P = json.load(open('models/continuum/fem_axisymmetric_warp/outputs/params_fem.json')); res['fem_axisymmetric_warp'] = run_fem(P, True)
 P0 = json.load(open('models/continuum/fem_axisymmetric_warp/outputs/params_fem_instant_release.json')); res['fem_instant_release'] = run_fem(P0, False)
-res['fem_relative_damping'] = run_fem(P, True, rd=1.0, mult=16.0)      # damping relative to the centre of mass, 16x the fitted rate (chosen on the training clips: hop_scan.py)
+res['fem_relative_damping'] = run_fem(P, True, rd=1.0, mult=16.0)      # damping relative to the centre of mass, 16x the fitted rate (chosen on the training clips: models/continuum/fem_relative_damping_hop/src/hop_scan.py)
 # --- 3D MPM with two damping rates
 E_, nu, a_fem, mp, mt = P['params']['E'], P['params']['nu'], P['params']['alpha'], P['params']['mu_plate'], P['params']['mu_table']
 a_cal = json.load(open('models/continuum/mpm_3d_warp/outputs/params_mpm.json'))['alpha']

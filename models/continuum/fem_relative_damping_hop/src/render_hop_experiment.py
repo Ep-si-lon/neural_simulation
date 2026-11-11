@@ -1,10 +1,11 @@
-"""Videos and a plot for the hop experiment (see hop_experiment.py): real clip | FEM as fitted (absolute damping, no hop) | FEM damped relative to the centre of mass at 8x, 4x and 1x the fitted strength.
+"""Videos and a plot for the hop experiment (see hop_experiment.py): real clip | FEM as fitted (absolute damping, no hop) | FEM damped relative to the centre of mass at 12x, 16x and 24x the fitted strength.
 The view is zoomed out (2400 px per metre) so the large hops stay in frame; damped relative to the centre of mass at 12x, 16x and 24x. Time zero = separation, slowed 8x. Usage: render_hop_experiment.py CLIP"""
 import sys, json, subprocess
 import numpy as np, cv2
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 from fem_axi import FEM
-from fit_fem import simulate_clip, OUT
+from fit_fem import simulate_clip
+OUT = 'models/continuum/fem_relative_damping_hop/outputs'; PARAMS = 'models/continuum/fem_axisymmetric_warp/outputs/params_fem.json'
 from realclip import real_panels, PX
 from render_fem import panel
 from clip_prep import prep
@@ -13,7 +14,7 @@ S2, BASE, SLOW, FPS = 2400.0, 60, 8, 30
 VARIANTS = [('FEM as fitted: absolute damping (no hop)', 0.0, 1.0), ('relative to centre of mass, 12x damping', 1.0, 12.0), ('relative, 16x damping (best on training clips)', 1.0, 16.0), ('relative, 24x damping', 1.0, 24.0)]
 
 def main(name):
-    P = json.load(open(f'{OUT}/params_fem.json')); base = np.array(P['prm']); fem = FEM(); c = prep(name); sims = []
+    P = json.load(open(PARAMS)); base = np.array(P['prm']); fem = FEM(); c = prep(name); sims = []
     for lab, rel, mult in VARIANTS:
         p = base.copy(); p[2] *= mult; cd, plan, x = simulate_clip(fem, name, p, rel=rel); sims.append((plan, x))
     Tr = c['tin'][0][-1]; tt = np.arange(-(Tr + 0.03), 0.25, 1 / (FPS * SLOW)); real = real_panels(name, tt, sc=S2 / (c['pxm']), table_row=PX - BASE)

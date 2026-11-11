@@ -44,3 +44,4 @@
 - **Separation frame (time zero):** the frame when the ball leaves the tin (the flat contact patch vanishes and the ball is about 70-80 % of its height). Before it the tin controls the ball; after it the ball recovers on its own.
 - **Tin retreat:** the 46-121 ms between the end of the pressed plateau and the separation, during which the tin lifts slowly and then fast with the ball riding on it. Its measured trajectory drives the plate in every simulation.
 - **Skill score:** 1 − (model error / plain-exponential error); positive means better than the baseline.
+- **Relative damping (hop model):** drag on a node's velocity minus the ball's centre-of-mass velocity, so only internal motion is damped and the whole ball can hop. It removes the drag the old `α·v` form put on whole-ball motion, so the rate α is multiplied (×16, chosen on the training clips) to restore the recovery. See `models/continuum/fem_relative_damping_hop`.
