@@ -1,17 +1,17 @@
-IMG_0536 hc=164px (41% of rest) n=46
-IMG_0537 hc=139px (36% of rest) n=45
-IMG_0538 hc=268px (67% of rest) n=45
-IMG_0539 hc=266px (67% of rest) n=45
+IMG_0536 hc=160px (40% of rest) n=46
+IMG_0537 hc=134px (34% of rest) n=45
+IMG_0538 hc=252px (63% of rest) n=45
+IMG_0539 hc=246px (62% of rest) n=45
 split 536+537 -> 538, 539
-  train ['IMG_0536', 'IMG_0537']: k=14341/s^2 (f=19.1Hz) c=371/s cubic=0.00
-    IMG_0538: height RMSE model 6.7% | exp-recovery 4.1% | stay-compressed 32.1%   top 7.2%  lift 2.3% (of ball height)
-    IMG_0539: height RMSE model 6.2% | exp-recovery 3.9% | stay-compressed 31.4%   top 7.2%  lift 3.2% (of ball height)
+  train ['IMG_0536', 'IMG_0537']: k=8973/s^2 (f=15.1Hz) c=260/s cubic=12.55
+    IMG_0538: height RMSE model 1.7% | exp-recovery 3.3% | stay-compressed 36.0%   top 2.7%  lift 1.8% (of ball height)
+    IMG_0539: height RMSE model 1.7% | exp-recovery 3.7% | stay-compressed 36.7%   top 4.0%  lift 3.2% (of ball height)
 leave-one-out
-  train ['IMG_0537', 'IMG_0538', 'IMG_0539']: k=15456/s^2 (f=19.8Hz) c=397/s cubic=0.00
-    IMG_0536: height RMSE model 8.3% | exp-recovery 5.8% | stay-compressed 56.3%   top 9.9%  lift 3.1% (of ball height)
-  train ['IMG_0536', 'IMG_0538', 'IMG_0539']: k=10835/s^2 (f=16.6Hz) c=268/s cubic=0.40
-    IMG_0537: height RMSE model 7.9% | exp-recovery 5.6% | stay-compressed 62.4%   top 13.2%  lift 10.8% (of ball height)
-  train ['IMG_0536', 'IMG_0537', 'IMG_0539']: k=13355/s^2 (f=18.4Hz) c=338/s cubic=0.00
-    IMG_0538: height RMSE model 6.6% | exp-recovery 4.0% | stay-compressed 32.1%   top 7.1%  lift 2.3% (of ball height)
-  train ['IMG_0536', 'IMG_0537', 'IMG_0538']: k=15741/s^2 (f=20.0Hz) c=403/s cubic=0.00
-    IMG_0539: height RMSE model 6.2% | exp-recovery 3.8% | stay-compressed 31.4%   top 7.1%  lift 3.2% (of ball height)
+  train ['IMG_0537', 'IMG_0538', 'IMG_0539']: k=17976/s^2 (f=21.3Hz) c=266/s cubic=0.46
+    IMG_0536: height RMSE model 2.4% | exp-recovery 5.6% | stay-compressed 58.5%   top 2.8%  lift 1.3% (of ball height)
+  train ['IMG_0536', 'IMG_0538', 'IMG_0539']: k=19096/s^2 (f=22.0Hz) c=255/s cubic=0.42
+    IMG_0537: height RMSE model 2.7% | exp-recovery 5.9% | stay-compressed 63.6%   top 5.6%  lift 4.8% (of ball height)
+  train ['IMG_0536', 'IMG_0537', 'IMG_0539']: k=7695/s^2 (f=14.0Hz) c=229/s cubic=15.21
+    IMG_0538: height RMSE model 1.7% | exp-recovery 3.3% | stay-compressed 36.0%   top 2.8%  lift 1.8% (of ball height)
+  train ['IMG_0536', 'IMG_0537', 'IMG_0538']: k=14844/s^2 (f=19.4Hz) c=230/s cubic=0.37
+    IMG_0539: height RMSE model 1.3% | exp-recovery 3.7% | stay-compressed 36.7%   top 2.8%  lift 3.1% (of ball height)

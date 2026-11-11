@@ -1,3 +1,5 @@
+> **SUPERSEDED.** The numbers and several conclusions below (the "snap back in 1-2 frames", the fast-snap negative result, the exponential beating the two-mass model) came from the release-frame bug described in [correction_release_definition.md](correction_release_definition.md). Read it as a historical record only; current results are in each model's README and in `../evaluation/model_comparison`.
+
 # Earlier 1D/2D experiments (bounce + recovery model, two-mass simulation)
 
 Moved from the top-level README. The project overview and repository map are in `../README.md`; each model's current README is under `../models/`. Kept for the full write-up of the first experiments (file paths in the original text are updated to the new layout).

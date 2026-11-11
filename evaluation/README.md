@@ -2,7 +2,7 @@
 
 | Folder | Question it answers |
 | --- | --- |
-| [recovery_time](recovery_time/) | How long does each model take to regain the ball's shape, against the real clips? (hops ignored) |
+| [model_comparison](model_comparison/) | How do all models compare, on the same measurements, in every aspect: height after release, recovery time, pressed shape, hop, speed, units, loads? |
+| [recovery_time](recovery_time/) | **Superseded.** An earlier recovery-time study; it measured from the wrong release frame. Its question is answered by section 2 of the model comparison. |
 
-It uses the saved fitted parameters in `models/*/outputs`, so `recovery_time/run.sh` takes seconds. The hop-height check lives with the model that needs it: `models/mesh_3d/foam_core_with_lift/src/hop_check.py`.
-Each model's own real-versus-model videos are in that model's `outputs/` (rendered by `render.sh`, which uses `shared/real_vs_3d.py` for the 3D models).
+`model_comparison/run.sh` takes about 5 minutes once the models are fitted. Each model's own real-versus-model videos are in that model's `outputs/`.

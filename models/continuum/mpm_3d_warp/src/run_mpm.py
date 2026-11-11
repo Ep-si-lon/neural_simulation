@@ -16,7 +16,11 @@ OUT = 'models/continuum/mpm_3d_warp/outputs'
 SLOW, FPS = 8, 30
 
 def material():
-    P = json.load(open(FEM_JSON))['params']; return P['E'], P['nu'], P['alpha'], P['mu_plate'], P['mu_table']
+    """E, nu, friction from the FEM fit; the damping rate is the one calibrated on the training clips (params_mpm.json) if it exists, else the FEM's."""
+    import os
+    P = json.load(open(FEM_JSON))['params']; a = P['alpha']
+    if os.path.exists(f'{OUT}/params_mpm.json'): a = json.load(open(f'{OUT}/params_mpm.json'))['alpha']
+    return P['E'], P['nu'], a, P['mu_plate'], P['mu_table']
 
 def panel(xs, tool, az, el, label):
     img = np.full((PX, PX, 3), 238, np.uint8); sx = lambda x: x * S + PX / 2; sy = lambda y: PX - 90 - y * S
@@ -60,16 +64,16 @@ def run_eval(log):
     E, nu, al, mp, mt = material(); cs = {n: prep(n) for n in CLIPS}; train = CLIPS[:2]; rows = []
     log(f'MPM material from the FEM fit: E {E:.0f} Pa, nu {nu:.3f}, alpha {al:.0f} 1/s, friction plate {mp:.2f} table {mt:.2f}, density {M.RHO} kg/m3 (estimate)')
     for n in CLIPS:
-        c = cs[n]; pxm = c['rest'] / 0.067; out = M.simulate(E, nu, al, mp, mt, 'flat', depth=c['hc'] / pxm, rec_dt=1 / 240)
+        c = cs[n]; pxm = c['rest'] / 0.067; out = M.simulate(E, nu, al, mp, mt, 'flat', depth=c['hc'] / pxm, rec_dt=1 / 240, tin=c['tin'])
         t = np.array(out['t']); h = np.array(out['height']) * pxm; w = np.array(out['width'])
         hs = np.interp(c['t'], t, h); h_rmse = 100 * np.sqrt(np.mean((hs - c['h']) ** 2)) / c['rest']
         he, hr = baselines(train, cs, c); e_rmse = 100 * np.sqrt(np.mean((he - c['h']) ** 2)) / c['rest']
-        i_h = np.flatnonzero(t < 0)[-1]; wm = c['width']; w_real = np.median(wm[c['i_rel'] - 30:c['i_rel'] - 5]) / np.median(wm[-len(wm) // 5:]); w_sim = w[i_h] / w[0]
-        rows.append(dict(clip=n, set='train' if n in train else 'TEST', height_rmse=h_rmse, exp_baseline=e_rmse, t95_model=recovery(t[t >= 0], h[t >= 0], c['rest']) if False else recovery(t[t >= 0] - t[t >= 0][0], h[t >= 0], c['rest']),
+        i_h = np.flatnonzero(t < 0)[-1]; wm = c['width']; w_real = np.median(wm[c['i_plat'] - 30:c['i_plat'] - 5]) / np.median(wm[-len(wm) // 5:]); w_sim = np.max(w[:np.flatnonzero(t < -c['tin'][0][-1])[-1] + 1][-5:]) / w[0]
+        rows.append(dict(clip=n, set='train' if n in train else 'TEST', height_rmse=h_rmse, exp_baseline=e_rmse, t95_model=recovery(t[t >= 0], h[t >= 0], c['rest']) if False else recovery(t[t >= 0], h[t >= 0], c['rest']),
                          t95_real=recovery(c['t'], np.maximum.accumulate(c['h']), c['rest']), pressed_width_sim=w_sim, pressed_width_real=w_real, particles=out['n_particles']))
         r = rows[-1]; log(f"  {n} ({r['set']}): height RMSE {h_rmse:.1f}% (exp baseline {e_rmse:.1f}%)  t95 MPM {r['t95_model']:.0f} ms vs real {r['t95_real']:.0f} ms  pressed width MPM {w_sim:.3f}x vs real {w_real:.3f}x  [{out['n_particles']} particles]")
         if n in ('IMG_0536', 'IMG_0538', 'IMG_0539'):
-            tt = np.arange(-0.06, 0.25, 1 / (FPS * SLOW)); real = real_panels(n, tt); tagc = 'TRAINING clip (FEM fit)' if n in train else 'HELD-OUT clip'
+            tt = np.arange(-(c['tin'][0][-1] + 0.03), 0.25, 1 / (FPS * SLOW)); real = real_panels(n, tt); tagc = 'TRAINING clip (FEM fit)' if n in train else 'HELD-OUT clip'
             def fr(i, out=out, tt=tt, real=real, n=n, tagc=tagc):
                 k = int(np.argmin(np.abs(np.array(out['t']) - tt[i]))); rp = real[i].copy(); cv2.putText(rp, f'REAL  {n}', (8, 22), cv2.FONT_HERSHEY_SIMPLEX, .5, (20, 20, 20), 1, cv2.LINE_AA)
                 c_ = np.full((PX + 34, 3 * PX, 3), 255, np.uint8); c_[34:, :PX] = rp; c_[34:, PX:2 * PX] = panel(out['snaps'][k], out['tool'][k], 0, 0, 'MPM (3D, Warp): side view'); c_[34:, 2 * PX:] = panel(out['snaps'][k], out['tool'][k], 35, 25, 'MPM: oblique')

@@ -14,13 +14,15 @@ def prep(name):
     t = d['pts_s']; rest = np.median(h[-len(h) // 5:])
     up = [i for i in range(1, len(h)) if h[i - 1] <= 0.5 * (h.min() + rest) < h[i]][-1]
     hold = np.median(h[up - 60:up - 15])                        # compressed plateau just before release
-    r = up
-    while h[r] < hold + 0.02 * rest: r -= 1                      # last frame still on the plateau = release instant
+    r = up                                                       # separation frame: the ball is free from here (squareness n drops, height ~70 % of rest)
+    p = up
+    while h[p] > hold + 0.02 * rest: p -= 1                      # last frame still on the pressed plateau = start of the tin's retreat
     b_ref = np.median(d['bottom_px'][-len(h) // 5:])
     top_up = (b_ref - medfilt(d['top_px'], 5))                   # top edge above table-contact bottom reference (px)
     lift = np.clip(b_ref - d['bottom_px'], 0, None)
     s = (t >= t[r]) & (t <= t[r] + HORIZON)
-    return dict(name=name, rest=rest, hc=hold, pxm=rest / DIAM_M, i_rel=r, t=t[s] - t[r], h=h[s], top=top_up[s], lift=lift[s],
+    tin = (t[p:r + 1] - t[p], np.maximum(h[p:r + 1], hold) / (rest / DIAM_M))      # tin retreat: time since plateau end, top-edge height (m) while the tin still carries the ball
+    return dict(name=name, rest=rest, hc=hold, pxm=rest / DIAM_M, i_rel=r, i_plat=p, tin=tin, t=t[s] - t[r], h=h[s], top=top_up[s], lift=lift[s],
                 full_t=t, full_h=h, full_top=top_up, width=d['width_px'], b_ref=b_ref)
 
 def rmse(c, h, top, lift):
@@ -33,3 +35,11 @@ def baselines(train, cs, c):
     tau = np.exp(least_squares(f, [np.log(.03)]).x[0])
     return c['rest'] - (c['rest'] - c['hc']) * np.exp(-c['t'] / tau), np.full_like(c['t'], c['hc'])
 
+
+
+def tin_plate_accel(t, yt, vt, tin, pxm):
+    """Acceleration (px/s^2, per unit mass) on the top mass from the tin plate while it retreats along the measured trajectory
+    tin = (time since plateau end, top-edge height in m); zero after the ball separates from it (t >= tin duration) or when tin is None."""
+    if tin is None or t >= tin[0][-1]: return 0.0
+    zp = np.interp(t, tin[0], tin[1]) * pxm; vp = (np.interp(t + 1e-4, tin[0], tin[1]) - np.interp(max(t - 1e-4, 0.0), tin[0], tin[1])) / 2e-4 * pxm
+    return (-KT * (yt - zp) - 2 * ZT * np.sqrt(KT) * max(vt - vp, 0.0)) if yt > zp else 0.0

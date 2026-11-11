@@ -1,6 +1,6 @@
 """Real clip | 3D model, side view | 3D model, oblique view, on ONE clock (t = 0 at release, ms), slowed 8x for viewing.
 Works for any 3D model: pass its parameter file (foam core: ks, kb, kr, cd; the gas shell's file has p0 instead of kr).
-The model is started from the clip's own measured pressed height and released at t = 0 (fitted on 0536+0537).
+The model is started from the clip's own measured pressed height; the plate then retreats along the measured tin trajectory and the ball is free from t = 0, the separation frame (fitted on 0536+0537).
 Real frames are shown at their true file timestamps (the newest frame at or before t).
 Usage: real_vs_3d.py CLIP PARAMS_JSON OUT_MP4 LABEL     (each 3D model's render.sh calls it)"""
 import sys, json, subprocess
@@ -14,7 +14,7 @@ SLOW, FPS, PRE, POST, SC = 8, 30, 0.06, 0.25, 1.025       # slow-mo factor, outp
 
 def main(name, params, out_path, label):
     c = prep(name); t_all, i0 = c['full_t'], c['i_rel']; t_rel = t_all[i0]
-    tt = np.arange(-PRE, POST, 1 / (FPS * SLOW))
+    Tr = c['tin'][0][-1]; tt = np.arange(-(Tr + 0.03), POST, 1 / (FPS * SLOW))          # the tin's retreat (measured) precedes the separation at t = 0
     d = np.genfromtxt(f'{TRACK_OUT}/{name}.csv', delimiter=',', names=True); cx = int(np.median(d['cx_px'][i0 - 5:i0 + 40]))
     need = sorted({int(np.searchsorted(t_all, t_rel + x, 'right') - 1) for x in tt}); frames, i = {}, 0
     p = subprocess.Popen(['ffmpeg', '-v', 'error', '-i', f'videos/{name}.MOV', '-fps_mode', 'passthrough', '-f', 'rawvideo', '-pix_fmt', 'bgr24', '-'], stdout=subprocess.PIPE, bufsize=W * H * 3 * 4)
@@ -34,7 +34,8 @@ def main(name, params, out_path, label):
     for x in tt:
         dt = x - prev; prev = x
         if x >= 0: b.tool = None
-        b.run(dt, DT, damp=80 if x < 0 else 0.0)
+        elif x >= -Tr: b.tool = ('plate', float(np.interp(x + Tr, c['tin'][0], c['tin'][1])) * rest / 0.067, 0)     # plate follows the measured tin trajectory
+        b.run(dt, DT, damp=80 if x < -Tr else 0.0)
         real = frames[int(np.searchsorted(t_all, t_rel + x, 'right') - 1)].copy(); cv2.putText(real, f'REAL  {name}', (8, 22), cv2.FONT_HERSHEY_SIMPLEX, .5, (20, 20, 20), 1, cv2.LINE_AA)
         side = draw(b, b.tool, 0, 0, '3D model: side view'); obl = draw(b, b.tool, 35, 25, '3D model: oblique')
         cv = np.full((PX + 34, 3 * PX, 3), 255, np.uint8); cv[34:, :PX], cv[34:, PX:2 * PX], cv[34:, 2 * PX:] = real, side, obl

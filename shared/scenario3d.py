@@ -21,6 +21,9 @@ def scenario(p, c):
     ks, kb, kr, cd = np.exp(p); b = Ball(sub=SUB, ks=ks, kb=kb, kr=kr, cd=cd); b.run(0.08, DT, damp=80)
     rest_h = b.shape()[0]; _, _, Wrest, _ = mesh_features(b, rest_h); target = rest_h * c['hc'] / c['rest']
     for i in range(40): b.tool = ('plate', rest_h - (rest_h - target) * (i + 1) / 40, 0); b.run(0.0015, DT, damp=80)
+    if c.get('tin') is not None:                                          # tin retreat: the plate follows the measured trajectory, then the ball is free
+        Tr = c['tin'][0][-1]; nr = max(int(round(Tr / 0.0015)), 1)
+        for i in range(nr): b.tool = ('plate', float(np.interp((i + 1) * Tr / nr, c['tin'][0], c['tin'][1])) * rest_h / 0.067, 0); b.run(Tr / nr, DT)
     b.tool = None; T, F = [], []
     for k in range(int(HORIZON / REC) + 1):
         if k: b.run(REC, DT)

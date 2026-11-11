@@ -38,8 +38,8 @@ def panel(arc, plate_z, az, el, label):
 
 def main(name):
     P = json.load(open(f'{OUT}/params_fem.json')); fem = FEM()
-    cd, plan, x = simulate_clip(fem, name, np.array(P['prm'])); t0 = plan['t_sq'] + plan['t_hold']; dt = plan['dt']
-    tt = np.arange(-PRE, POST, 1 / (FPS * SLOW)); real = real_panels(name, tt)
+    cd, plan, x = simulate_clip(fem, name, np.array(P['prm'])); dt = plan['dt']; t0 = plan['n_sep'] * dt
+    Tr = cd['tin'][0][-1]; tt = np.arange(-(Tr + 0.03), POST, 1 / (FPS * SLOW)); real = real_panels(name, tt)      # window starts just before the tin begins to retreat
     out = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'bgr24', '-s', f'{3*PX}x{PX+34}', '-r', str(FPS), '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
                             f'{OUT}/real_vs_fem_{name}.mp4'], stdin=subprocess.PIPE)
     tag = 'TRAINING clip' if name in ('IMG_0536', 'IMG_0537') else 'HELD-OUT clip'

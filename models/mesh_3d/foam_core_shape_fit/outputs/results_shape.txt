@@ -1,7 +1,7 @@
 shape fit: train 0536+0537 -> test 0538, 0539
-   start (128, 321, 778, 18.7) cost 0.1842 params [ 126.6  276.4 1000.5   23. ]
-   start (1500, 30, 750, 19.0) cost 0.1904 params [ 501.7   43.5 1192.7   23.1]
-  IMG_0536 (train): height 7.6%  lift 3.7%  width 1.6% (of rest width)  squareness n RMSE 0.92
-  IMG_0537 (train): height 7.7%  lift 4.7%  width 0.5% (of rest width)  squareness n RMSE 0.98
-  IMG_0538 (TEST): height 6.1%  lift 2.4%  width 1.4% (of rest width)  squareness n RMSE 0.15
-  IMG_0539 (TEST): height 6.0%  lift 3.2%  width 0.7% (of rest width)  squareness n RMSE 0.21
+   start (128, 321, 778, 18.7) cost 0.1054 params [ 119.3 1628.4 2574.3   35.9]
+   start (1500, 30, 750, 19.0) cost 0.1496 params [1421.9   29.2  768.5   19.3]
+  IMG_0536 (train): height 3.2%  lift 1.8%  width 2.0% (of rest width)  squareness n RMSE 0.17
+  IMG_0537 (train): height 3.7%  lift 2.5%  width 0.5% (of rest width)  squareness n RMSE 0.18
+  IMG_0538 (TEST): height 2.0%  lift 1.7%  width 0.8% (of rest width)  squareness n RMSE 0.07
+  IMG_0539 (TEST): height 1.7%  lift 3.2%  width 0.5% (of rest width)  squareness n RMSE 0.09

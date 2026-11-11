@@ -126,9 +126,9 @@ def sample_ball(ppc=2):
 
 def lame(E, nu): return E / (2 * (1 + nu)), E * nu / ((1 + nu) * (1 - 2 * nu))
 
-def simulate(E, nu, alpha, mu_plate, mu_table, load='flat', depth=None, t_sq=0.12, t_hold=0.04, t_rel=0.25, rec_dt=1 / 240, ppc=2, device=None):
+def simulate(E, nu, alpha, mu_plate, mu_table, load='flat', depth=None, t_sq=0.12, t_hold=0.04, t_rel=0.25, rec_dt=1 / 240, ppc=2, device=None, tin=None):
     """Run one load. depth: flat -> plate height above the table; point -> probe-tip height above the table; side -> final gap between the plates (m).
-    Returns dict(t (s from release), height, width, snaps (particle positions at each record time), tool (load, position, probe radius))."""
+    tin = (time since plateau end, top-edge height in m) makes the flat plate retreat along the measured tin trajectory before the ball is free (None = instant removal). Returns dict(t (s from separation / release), height, width, snaps (particle positions at each record time), tool (load, position, probe radius))."""
     dev = device or wp.get_preferred_device(); mu, lam = lame(E, nu); c = np.sqrt((lam + 2 * mu) / RHO)
     dt = float(np.clip(min(0.25 * DX / c, 0.08 / max(alpha, 600.0)), 4e-6, 2e-5))
     pos0, vol = sample_ball(ppc); n = len(pos0); mp = RHO * vol
@@ -136,27 +136,30 @@ def simulate(E, nu, alpha, mu_plate, mu_table, load='flat', depth=None, t_sq=0.1
     C = wp.zeros(n, dtype=wp.mat33, device=dev); F = wp.array(np.tile(np.eye(3, dtype=np.float32), (n, 1, 1)), dtype=wp.mat33, device=dev)
     gv = wp.zeros((NG, NG, NG), dtype=wp.vec3, device=dev); gm = wp.zeros((NG, NG, NG), dtype=float, device=dev)
     top0 = YT + 2 * R + 0.0004
-    n_sq, n_hold, n_rel = int(t_sq / dt), int(t_hold / dt), int(t_rel / dt); total = n_sq + n_hold + n_rel
+    n_sq, n_hold, n_rel = int(t_sq / dt), int(t_hold / dt), int(t_rel / dt); n_ret = 0 if (tin is None or load != 'flat') else int(round(tin[0][-1] / dt)); n_sep = n_sq + n_hold + n_ret; total = n_sep + n_rel
+    if n_ret: tr = np.arange(n_ret) * dt; zr = np.interp(tr, tin[0], tin[1]); vr = np.gradient(zr, dt)
     rec_every = max(int(round(rec_dt / dt)), 1); kind = {'flat': 0, 'point': 1, 'side': 2}[load]
     pr = 0.006 if load == 'point' else 0.0
-    out = dict(t=[], height=[], width=[], snaps=[], tool=[], dt=dt, n_particles=n, t_release=(n_sq + n_hold) * dt)
+    out = dict(t=[], height=[], width=[], snaps=[], tool=[], dt=dt, n_particles=n, t_release=n_sep * dt)
     for s in range(total + 1):
-        active = s < n_sq + n_hold; f = min(s / n_sq, 1.0) if active else 1.0; ramp = s < n_sq
+        active = s < n_sep; f = min(s / n_sq, 1.0) if s < n_sq + n_hold else 1.0; ramp = s < n_sq
         plate_y, plate_v, side_gap, side_v = 1e3, 0.0, 1e3, 0.0; probe_c = wp.vec3(0.0, 1e3, 0.0); probe_v = wp.vec3(0.0, 0.0, 0.0); tool_pos = 1e3
         if active:
             if load == 'flat':
-                span = top0 - (YT + depth); plate_y = top0 - span * f; plate_v = -span / t_sq if ramp else 0.0; tool_pos = plate_y - YT
+                span = top0 - (YT + depth); plate_y = top0 - span * f; plate_v = -span / t_sq if ramp else 0.0
+                if s >= n_sq + n_hold: plate_y = YT + float(zr[s - n_sq - n_hold]); plate_v = float(vr[s - n_sq - n_hold])      # tin retreat
+                tool_pos = plate_y - YT
             if load == 'point':
                 span = top0 - (YT + depth); tip = top0 - span * f; probe_c = wp.vec3(CX, tip + pr, CZ); probe_v = wp.vec3(0.0, -span / t_sq if ramp else 0.0, 0.0); tool_pos = tip - YT
             if load == 'side':
                 span = 2 * R + 0.001 - depth; side_gap = 2 * R + 0.001 - span * f; side_v = (span / 2) / t_sq if ramp else 0.0; tool_pos = side_gap
         if s % rec_every == 0:
-            xs = x.numpy(); out['t'].append(s * dt - (n_sq + n_hold) * dt); out['height'].append(float(xs[:, 1].max() - xs[:, 1].min()) + DX / ppc); out['width'].append(float(np.ptp(xs[:, 0])) + DX / ppc)
+            xs = x.numpy(); out['t'].append(s * dt - n_sep * dt); out['height'].append(float(xs[:, 1].max() - xs[:, 1].min()) + DX / ppc); out['width'].append(float(np.ptp(xs[:, 0])) + DX / ppc)
             out['snaps'].append(xs.astype(np.float32).copy()); out['tool'].append((load, tool_pos, pr, YT))
         if s == total: break
         wp.launch(k_clear, dim=(NG, NG, NG), inputs=[gv, gm], device=dev)
         wp.launch(k_p2g, dim=n, inputs=[x, v, C, F, mp, vol, mu, lam, dt, gv, gm], device=dev)
-        gam = 600.0 if active else alpha
+        gam = 600.0 if s < n_sq + n_hold else alpha
         wp.launch(k_grid, dim=(NG, NG, NG), inputs=[gv, gm, dt, gam, mu_plate, mu_table, kind, plate_y, plate_v, side_gap, side_v, probe_c, pr, probe_v], device=dev)
         wp.launch(k_g2p, dim=n, inputs=[x, v, C, F, gv, dt], device=dev)
     return out

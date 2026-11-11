@@ -1,31 +1,35 @@
-# 3D gas-filled shell (abandoned)
+# 3D gas-filled shell
 
 **Idea.** The ball is a sealed, air-filled skin: surface springs plus an internal gas whose pressure rises as the volume shrinks.
 
-## Formulas (per node `i`, per unit mass; `m = 1/162`)
-- Stretch spring on every mesh edge: `f = −k_s (l − l₀) û − c_d (v_rel · û) û`
-- Bending spring between the two far corners of each pair of neighbouring triangles: `f = −k_b (l_b − l_b0) û_b`
-- Gas pressure: `p = p₀ V₀ / V`, with `V = Σ a·(b×c) / 6` over triangles; force `p · A · n̂` split over each triangle's 3 nodes (outward normal)
-- Gravity `−g`, table penalty (`K_T = 10⁷`) and friction, contact penalty from the pressing tool.
+## Formulas (per node, per unit mass; `m = 1/162`)
+- Stretch spring on every mesh edge: `f = −k_s (l − l₀) û − c_d (v_rel · û) û`; bending spring between the far corners of neighbouring triangles: `f = −k_b (l_b − l_b0) û_b`.
+- Gas pressure: `p = p₀ V₀ / V` (`V = Σ a·(b×c) / 6` over triangles), force `p · A · n̂` split over each triangle's 3 nodes. Gravity, table penalty and friction, contact penalty from the plate.
 
 ## Parameters
 | Symbol | Meaning | Kind | Value |
 | --- | --- | --- | --- |
-| k_s, k_b | stretch / bending spring | fitted | 6853, 827 |
-| p₀ | initial gas pressure (per unit mass) | fitted | 25 |
-| c_d | damping | fitted | 0.7 |
-| mesh, table, g | see `../README.md` | fixed | — |
-| compressed height, release time | per clip | measured | — |
+| k_s, k_b | stretch / bending spring | fitted | 30,000 / 3,000 |
+| p₀ | initial gas pressure | fitted | 3,000 |
+| c_d | damping | fitted | 5.0 |
+| mesh, table, g, compressed height, tin trajectory | see `../README.md` | fixed / measured | — |
 
-## Assumptions
-Gas amount constant and isothermal; skin stretchable; uniform pressure; foam walls ignored.
+**These are the optimizer's starting values**: the fit made no progress from its first starting point (cost 0.199), so this model is effectively an unfitted baseline.
 
-## Limitations (why abandoned)
-- Sealed gas under a stretchy skin conserves volume: the pressed ball bulged to 1.23–1.26× its width (measured 1.10×), like a water balloon.
-- The fit chose almost no damping (damping ratio ≈ 0.04), so after release it rang and bulged on each bounce; height RMSE 10–13 %.
-- A real foam ball is porous and does not conserve volume; replaced by `foam_core_height_fit`.
+## Assumptions and limitations
+Gas amount constant and isothermal; skin stretchable; uniform pressure. A sealed gas under a stretchy skin conserves volume, so the pressed ball bulges (1.165-1.169× width on the deep presses against 1.077× measured) and rings after release: the height overshoots by 5-10 % and oscillates for about 100 ms (see `evaluation/model_comparison/outputs/fig1_height_curves_all.png`). A real foam ball is porous; replaced by the foam-core models.
+
+## Results (SAM 2 truth; common footing)
+| Clip | Height RMSE (%) | Plain exponential | Pressed width model / real | Hop (mm) model / real |
+| --- | --- | --- | --- | --- |
+| 0536 (train) | 4.6 | 5.4 | 1.165 / 1.077 | 12.9 / 7.1 |
+| 0537 (train) | 4.4 | 6.1 | 1.169 / 1.077 | 14.4 / 7.5 |
+| 0538 (**test**) | 3.7 | 3.1 | 1.040 / 1.043 | 5.4 / 3.3 |
+| 0539 (**test**) | 4.1 | 3.4 | 1.044 / 1.043 | 4.9 / 5.4 |
+
+Worse than the plain exponential on the test clips.
+
+**Videos** (`outputs/real_vs_3d_IMG_0536|0538|0539.mp4`): real clip, the model's side view and its oblique view on one clock (time zero = the tin separates; the window starts just before the tin begins to retreat; slowed 8x). 0536 is a training clip; 0538 and 0539 are held out. `./render.sh` re-renders them from the saved parameters in about a minute.
 
 ## Run
-`./run.sh` (about 10 min; needs `tracking/run.sh` first). Code `src/fit_gas.py` (restored from the commit where the gas model was first fitted). Outputs `outputs/results_gas.txt`, `params_gas.json`, and the two earlier demo videos `demo_flat_gas.mp4`, `demo_point_gas.mp4` (an earlier renderer; superseded by the `real_vs_3d_*` videos).
-
-**Videos** (`outputs/real_vs_3d_IMG_0536|0538|0539.mp4`): real clip, the model's side view and its oblique view on one clock (t = 0 at release, slowed 8x). 0536 is a training clip; 0538 and 0539 are held out. `./render.sh` re-renders them from the saved parameters in about a minute.
+`./run.sh` (fit about 10 min, then videos; `TRACKER=sam2`). Code `src/fit_gas.py`. Outputs `outputs/results_gas.txt`, `params_gas.json`, the earlier `demo_*_gas.mp4` (old renderer) and `outputs/archive_v1_instant_release/`.

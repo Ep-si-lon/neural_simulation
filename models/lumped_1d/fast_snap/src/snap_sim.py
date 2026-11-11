@@ -7,18 +7,19 @@ import numpy as np
 from scipy.integrate import solve_ivp
 from scipy.optimize import least_squares
 from common import CLIPS
-from clip_prep import prep, rmse, baselines, G, KT, ZT, SPLIT
+from clip_prep import prep, rmse, baselines, G, KT, ZT, SPLIT, tin_plate_accel
 
 def simulate(p, c, t_eval=None):
     k, cc, khi, x0f = np.exp(p[0]), np.exp(p[1]), np.exp(p[2]), p[3]
     h0, g, x0 = c['rest'], G * c['pxm'], p[3] * c['rest']
     mb, mt = SPLIT, 1 - SPLIT
-    def f(_, s):
+    tin = c.get('tin'); T0 = tin[0][-1] if tin is not None else 0.0
+    def f(t, s):
         yb, vb, yt, vt = s; h = yt - yb; x = h0 - h
         fi = k * x + khi * max(x - x0, 0.0) - cc * (vt - vb)
         tab = (-KT * yb - 2 * ZT * np.sqrt(KT) * vb) if yb < 0 else 0.0
-        return [vb, (tab - fi) / mb - g, vt, fi / mt - g]
-    t_eval = c['t'] if t_eval is None else t_eval
+        return [vb, (tab - fi) / mb - g, vt, fi / mt - g + tin_plate_accel(t, yt, vt, tin, c['pxm'])]
+    t_eval = (c['t'] if t_eval is None else t_eval) + T0
     sol = solve_ivp(f, (0, t_eval[-1]), [0, 0, c['hc'], 0], t_eval=t_eval, method='Radau', rtol=1e-6, atol=1e-6)
     yb, yt = sol.y[0], sol.y[2]
     return yt - yb, yt, np.clip(yb, 0, None)

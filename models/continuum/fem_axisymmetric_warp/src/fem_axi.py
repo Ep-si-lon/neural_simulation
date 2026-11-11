@@ -128,24 +128,18 @@ class FEM:
     @staticmethod
     def lame(E, nu): return E / (2 * (1 + nu)), E * nu / ((1 + nu) * (1 - 2 * nu))
 
-    def plan(self, E, nu, h_hold, alpha=3000.0, t_sq=0.12, t_hold=0.04, t_rel=0.25, gam=600.0):
-        """Time steps and per-step plate / damping-mode arrays for one clip (squeeze ramp, hold, release)."""
-        mu, lam = self.lame(E, nu); c = np.sqrt((lam + 2 * mu) / RHO)
-        dt = float(np.clip(min(0.3 * 0.0015 / c, 0.1 / max(alpha, gam)), 4e-6, 3e-5))
+    def plan_with_dt(self, dt, h_hold, t_sq=0.12, t_hold=0.04, t_rel=0.25, gam=600.0, tin=None):
+        """Per-step plate / damping-mode arrays: squeeze ramp, hold, then the tin's retreat (tin = (time since plateau end, top-edge height in m) measured from the video; the plate
+        follows it until the ball separates), then the plate is removed and the free recovery is simulated for t_rel. tin=None reproduces the older protocol (instant removal)."""
         n_sq, n_hold, n_rel = int(t_sq / dt), int(t_hold / dt), int(t_rel / dt)
-        n = n_sq + n_hold + n_rel
-        z0 = 2 * R + 1e-4; plate = np.empty(n + 1); pv = np.zeros(n + 1); mode = np.zeros(n + 1, np.int32)
+        n_ret = 0 if tin is None else int(round(tin[0][-1] / dt)); n = n_sq + n_hold + n_ret + n_rel
+        z0 = 2 * R + 1e-4; plate = np.full(n + 1, 1e6); pv = np.zeros(n + 1); mode = np.zeros(n + 1, np.int32)
         k = np.arange(n_sq); plate[:n_sq] = z0 - (z0 - h_hold) * k / n_sq; pv[:n_sq] = -(z0 - h_hold) / t_sq
-        plate[n_sq:n_sq + n_hold] = h_hold; plate[n_sq + n_hold:] = 1e6; mode[n_sq + n_hold:] = 1
-        return dict(dt=dt, n=n, n_sq=n_sq, n_hold=n_hold, n_rel=n_rel, plate=plate, pv=pv, mode=mode, z0=z0, h_hold=h_hold, gam=gam, t_sq=t_sq, t_hold=t_hold)
-
-    def plan_with_dt(self, dt, h_hold, t_sq=0.12, t_hold=0.04, t_rel=0.25, gam=600.0):
-        """Same as plan() but with a given time step (used when the step is set from the current Lame constants)."""
-        n_sq, n_hold, n_rel = int(t_sq / dt), int(t_hold / dt), int(t_rel / dt); n = n_sq + n_hold + n_rel
-        z0 = 2 * R + 1e-4; plate = np.empty(n + 1); pv = np.zeros(n + 1); mode = np.zeros(n + 1, np.int32)
-        k = np.arange(n_sq); plate[:n_sq] = z0 - (z0 - h_hold) * k / n_sq; pv[:n_sq] = -(z0 - h_hold) / t_sq
-        plate[n_sq:n_sq + n_hold] = h_hold; plate[n_sq + n_hold:] = 1e6; mode[n_sq + n_hold:] = 1
-        return dict(dt=dt, n=n, n_sq=n_sq, n_hold=n_hold, n_rel=n_rel, plate=plate, pv=pv, mode=mode, z0=z0, h_hold=h_hold, gam=gam, t_sq=t_sq, t_hold=t_hold)
+        plate[n_sq:n_sq + n_hold] = h_hold
+        if n_ret:
+            tr = np.arange(n_ret) * dt; zr = np.interp(tr, tin[0], tin[1]); plate[n_sq + n_hold:n_sq + n_hold + n_ret] = zr; pv[n_sq + n_hold:n_sq + n_hold + n_ret] = np.gradient(zr, dt)
+        mode[n_sq + n_hold:] = 1
+        return dict(dt=dt, n=n, n_sq=n_sq, n_hold=n_hold, n_ret=n_ret, n_sep=n_sq + n_hold + n_ret, n_rel=n_rel, plate=plate, pv=pv, mode=mode, z0=z0, h_hold=h_hold, gam=gam, t_sq=t_sq, t_hold=t_hold)
 
     def run(self, prm, plan, events=None, tape=False):
         """prm = [mu, lam, alpha, mu_plate, mu_table] (numpy or warp array). Returns (x_all warp array, loss array, prm array, tape)."""

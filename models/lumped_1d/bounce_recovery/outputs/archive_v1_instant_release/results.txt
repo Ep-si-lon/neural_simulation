@@ -1,0 +1,16 @@
+per-clip fit (e, tau ms):
+  IMG_0536: e=0.73 tau=72ms tc=7ms
+  IMG_0537: e=0.63 tau=30ms tc=16ms
+  IMG_0538: e=0.80 tau=48ms tc=8ms
+  IMG_0539: e=0.66 tau=65ms tc=10ms
+
+split: train 0536+0537 -> test 0538, 0539 (no refit)
+  e=0.68 tau=37ms tc=12ms
+  IMG_0538: model 0.99%  exp-baseline 0.52%  rest-baseline 1.14%  (RMSE % of ball height)
+  IMG_0539: model 0.63%  exp-baseline 1.18%  rest-baseline 1.77%  (RMSE % of ball height)
+
+leave-one-clip-out:
+  hold IMG_0536: e=0.66 tau=54ms tc=14ms  model 1.11%  exp 1.69%  rest 4.42%
+  hold IMG_0537: e=0.71 tau=59ms tc=8ms  model 0.97%  exp 1.19%  rest 3.13%
+  hold IMG_0538: e=0.68 tau=57ms tc=12ms  model 1.18%  exp 0.55%  rest 1.14%
+  hold IMG_0539: e=0.69 tau=44ms tc=12ms  model 0.63%  exp 1.19%  rest 1.77%

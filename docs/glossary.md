@@ -41,3 +41,6 @@
 - **NVIDIA Warp / PyTorch:** Warp is a library that runs the simulation on the GPU and can differentiate through it; PyTorch drives the optimizer that adjusts the parameters.
 - **SAM 2:** Meta's pretrained model that cuts the ball out of every video frame. It is the only neural network in the project.
 - **Rayleigh (mass-proportional) damping:** a drag proportional to velocity. It makes the recovery overdamped (no wobble) but also stops the whole ball from hopping.
+- **Separation frame (time zero):** the frame when the ball leaves the tin (the flat contact patch vanishes and the ball is about 70-80 % of its height). Before it the tin controls the ball; after it the ball recovers on its own.
+- **Tin retreat:** the 46-121 ms between the end of the pressed plateau and the separation, during which the tin lifts slowly and then fast with the ball riding on it. Its measured trajectory drives the plate in every simulation.
+- **Skill score:** 1 − (model error / plain-exponential error); positive means better than the baseline.

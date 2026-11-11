@@ -1,0 +1,46 @@
+[
+ {
+  "clip": "IMG_0536",
+  "set": "train",
+  "height_rmse": 3.6540507509721887,
+  "exp_baseline": 5.6348701565911945,
+  "t95_model": 41.6,
+  "t95_real": 37.499999999999645,
+  "pressed_width_sim": 1.102917535355784,
+  "pressed_width_real": 1.0769230769230769,
+  "particles": 79711
+ },
+ {
+  "clip": "IMG_0537",
+  "set": "train",
+  "height_rmse": 3.3122807313785936,
+  "exp_baseline": 5.786882141021575,
+  "t95_model": 41.6,
+  "t95_real": 41.66700000000034,
+  "pressed_width_sim": 1.1270390856163228,
+  "pressed_width_real": 1.0717703349282297,
+  "particles": 79711
+ },
+ {
+  "clip": "IMG_0538",
+  "set": "TEST",
+  "height_rmse": 2.1892023781778276,
+  "exp_baseline": 3.308670939877537,
+  "t95_model": 37.44,
+  "t95_real": 29.167000000000165,
+  "pressed_width_sim": 1.0391963889204827,
+  "pressed_width_real": 1.0432692307692308,
+  "particles": 79711
+ },
+ {
+  "clip": "IMG_0539",
+  "set": "TEST",
+  "height_rmse": 2.309877385759539,
+  "exp_baseline": 3.735080978491694,
+  "t95_model": 37.44,
+  "t95_real": 25.000000000000355,
+  "pressed_width_sim": 1.0406864250307062,
+  "pressed_width_real": 1.0384615384615385,
+  "particles": 79711
+ }
+]

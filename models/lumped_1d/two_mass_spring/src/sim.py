@@ -7,18 +7,19 @@ from scipy.optimize import least_squares
 from scipy.signal import medfilt
 from common import CLIPS, load
 
-from clip_prep import G, DIAM_M, SPLIT, KT, ZT, HORIZON, prep, rmse, baselines
+from clip_prep import G, DIAM_M, SPLIT, KT, ZT, HORIZON, prep, rmse, baselines, tin_plate_accel
 
 def simulate(p, c, t_eval=None):
     k, cc, z3 = np.exp(p[:3]); k3 = k * z3 / c['rest'] ** 2; h0 = c['rest']; g = G * c['pxm']
     mb, mt = SPLIT, 1 - SPLIT
-    def f(_, s):
+    tin = c.get('tin'); T0 = tin[0][-1] if tin is not None else 0.0          # the tin retreats along the measured trajectory until the ball separates
+    def f(t, s):
         yb, vb, yt, vt = s; h = yt - yb; hd = vt - vb; x = h0 - h
         fi = k * x + k3 * x ** 3 + (-cc * hd)                      # internal force pushing top up / bottom down
         ft = -KT * 0 + fi
         tab = (-KT * yb - 2 * ZT * np.sqrt(KT) * vb) if yb < 0 else 0.0
-        return [vb, (tab - fi) / mb - g, vt, ft / mt - g]
-    t_eval = c['t'] if t_eval is None else t_eval
+        return [vb, (tab - fi) / mb - g, vt, ft / mt - g + tin_plate_accel(t, yt, vt, tin, c['pxm'])]
+    t_eval = (c['t'] if t_eval is None else t_eval) + T0                       # times given relative to the separation instant
     sol = solve_ivp(f, (0, t_eval[-1]), [0, 0, c['hc'], 0], t_eval=t_eval, method='Radau', rtol=1e-6, atol=1e-6)
     yb, yt = sol.y[0], sol.y[2]
     return yt - yb, yt, np.clip(yb, 0, None)                        # height, top above table, lift of bottom

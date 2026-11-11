@@ -14,4 +14,4 @@ done
 tracking/run_sam2.sh
 if [ "${1:-}" = "--fit-3d" ]; then models/continuum/fem_axisymmetric_warp/run.sh; else models/continuum/fem_axisymmetric_warp/render.sh; fi
 models/continuum/mpm_3d_warp/run.sh
-evaluation/recovery_time/run.sh
+evaluation/model_comparison/run.sh

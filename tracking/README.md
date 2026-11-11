@@ -24,5 +24,8 @@ Consequences: the **pressed (hold) height is 4-20 px too high in the colour data
 - The continuum models (`models/continuum`) are fitted on the SAM 2 data. **The earlier lumped and mesh models were fitted on the colour data**: their release-phase targets are unaffected, but the compressed height they start from is 4-5 % too high, and I did not refit them.
 - Mask agreement with the colour tracker (IoU): mean 0.92-0.95, 5th percentile about 0.88 (`outputs_sam2/*_compare.txt`).
 
+## The tin retreat (used by every model)
+After the pressed plateau the tin does not vanish: it retreats over 46-121 ms with the ball riding on it, until the ball separates (squareness n drops, height about 70-80 % of rest). `clip_prep.prep()` returns the plateau end, the separation frame (time zero) and the measured top-edge trajectory in between, which drives a plate in every simulator (`docs/correction_release_definition.md`).
+
 ## Limitations
 Fixed colour threshold; bottom edge clamps at the table line while touching; tin glare corrupts the top edge for a few frames at release (most visible in IMG_0538); the first frames after release are partly hand-driven; I spot-checked traces and frames, not every debug frame.

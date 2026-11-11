@@ -4,13 +4,14 @@ Targets per clip: the outline (width at 48 levels from top to bottom, tracked in
   - 3 points along the squeeze (plate at 25 / 50 / 75 % of its travel), the hold, and every 3rd frame of the 0.25 s after release.
 Gradients come from Warp's tape (the whole run is differentiable); torch handles the parameter mapping, Adam and the schedule.
 Run: models/continuum/fem_axisymmetric_warp/run.sh"""
-import sys, json, time
+import os, sys, json, time
 import numpy as np, torch, warp as wp
 from common import CLIPS, TRACK_OUT
 from clip_prep import prep
 from fem_axi import FEM, RHO, R
 
 L0, L1 = 3, 45
+PROTOCOL = os.environ.get('FEM_PROTOCOL', 'tin')   # 'tin': the plate follows the measured tin retreat; 'instant': plate removed at the separation frame (the older, flawed protocol, kept as an ablation)
 TRAIN, TEST = CLIPS[:2], CLIPS[2:]
 
 def safe_dt(cw, alpha):
@@ -27,22 +28,22 @@ def theta_to_params(th):
 
 def clip_data(name):
     c = prep(name); z = np.load(f'{TRACK_OUT}/{name}_sil.npz'); pxm = c['rest'] / 0.067
-    return dict(name=name, c=c, z=z, pxm=pxm, h_hold=c['hc'] / pxm)
+    return dict(name=name, c=c, z=z, pxm=pxm, h_hold=c['hc'] / pxm, tin=(c['tin'] if PROTOCOL == 'tin' else None))
 
 def make_events(cd, plan, dev):
     c, z, pxm, dt = cd['c'], cd['z'], cd['pxm'], plan['dt']
-    r, h_hold = c['i_rel'], cd['h_hold']; st, hm, lm, wm, wt = [], [], [], [], []
+    r, p, h_hold = c['i_rel'], c['i_plat'], cd['h_hold']; st, hm, lm, wm, wt = [], [], [], [], []   # r: separation frame, p: end of the pressed plateau
     wprof = lambda fr: (np.nanmedian(z['right'][fr] - z['left'][fr], 0) if np.ndim(fr) else (z['right'][fr] - z['left'][fr])) / pxm
-    t0 = plan['t_sq'] + plan['t_hold']
+    t0 = plan['n_sep'] * dt                                              # separation instant: the ball is free from here
     for k in range(0, len(c['t']), 3):                                    # release
         st.append(int(round((t0 + c['t'][k]) / dt))); hm.append(c['h'][k] / pxm); lm.append(0.0); wm.append(wprof(r + k)); wt.append((1.0, 1.0, 0.0))
     st.append(plan['n_sq'] + plan['n_hold'] - 1); hm.append(h_hold); lm.append(0.0)       # hold: outline of the pressed ball
-    wm.append(wprof(np.arange(r - 30, r - 5))); wt.append((4.0, 0.0, 0.0))
+    wm.append(wprof(np.arange(p - 30, p - 5))); wt.append((4.0, 0.0, 0.0))
     fh = c['full_h'] / pxm
     for f in (0.25, 0.5, 0.75):                                          # squeeze path: plate at a fraction of its travel
-        lvl = plan['z0'] - f * (plan['z0'] - h_hold); idx = np.flatnonzero(fh[:r] > lvl)
+        lvl = plan['z0'] - f * (plan['z0'] - h_hold); idx = np.flatnonzero(fh[:p] > lvl)
         if len(idx) == 0: continue
-        fr = min(idx[-1] + 1, r - 1); st.append(int(f * plan['n_sq'])); hm.append(lvl); lm.append(0.0); wm.append(wprof(fr)); wt.append((1.5, 0.3, 0.0))
+        fr = min(idx[-1] + 1, p - 1); st.append(int(f * plan['n_sq'])); hm.append(lvl); lm.append(0.0); wm.append(wprof(fr)); wt.append((1.5, 0.3, 0.0))
     st = np.array(st, np.int32); st = np.minimum(st, plan['n'])
     return dict(step=st, w_step=wp.array(st, dtype=int, device=dev), w_h=wp.array(np.array(hm, np.float32), dtype=float, device=dev), w_l=wp.array(np.array(lm, np.float32), dtype=float, device=dev),
                 w_w=wp.array(np.array(wm, np.float32), dtype=float, device=dev), w_wt=wp.array(np.array(wt, np.float32), dtype=wp.vec3, device=dev), l0=L0, l1=L1)
@@ -53,7 +54,7 @@ def loss_and_grad(fem, cds, p, dt_fixed=None):
     for cd in cds:
         mu, lam = float(p[0]), float(p[1]); cw = np.sqrt((lam + 2 * mu) / RHO)
         dt = dt_fixed or safe_dt(cw, float(p[2]))
-        plan = fem.plan_with_dt(dt, cd['h_hold'])
+        plan = fem.plan_with_dt(dt, cd['h_hold'], tin=cd['tin'])
         ev = make_events(cd, plan, fem.dev)
         x_all, loss, prm_w, tp = fem.run(p.detach().numpy().astype(np.float32), plan, ev, tape=True)
         tp.backward(loss=loss)
@@ -77,10 +78,11 @@ def fit(fem, names, iters=45, lr=0.12, th0=None, log=print):
 
 OUT = 'models/continuum/fem_axisymmetric_warp/outputs'
 
-def simulate_clip(fem, name, p):
+def simulate_clip(fem, name, p, use_tin=True):
     """Forward run (no tape) with fitted parameters p; returns plan and per-step arrays of the top/bottom axis nodes and the outline-relevant nodes."""
     cd = clip_data(name); mu, lam = float(p[0]), float(p[1]); cw = np.sqrt((lam + 2 * mu) / RHO)
-    dt = safe_dt(cw, float(p[2])); plan = fem.plan_with_dt(dt, cd['h_hold'])
+    if not use_tin: cd['tin'] = None                                      # older protocol: instant removal at the separation frame
+    dt = safe_dt(cw, float(p[2])); plan = fem.plan_with_dt(dt, cd['h_hold'], tin=cd['tin'])
     x_all, _, _, _ = fem.run(np.asarray(p, np.float32), plan, None, tape=False)
     return cd, plan, x_all.numpy()
 
@@ -91,7 +93,7 @@ def evaluate(fem, p, names, train, log=print):
     from clip_prep import baselines
     cs = {n: prep(n) for n in CLIPS}; rows = []
     for n in names:
-        cd, plan, x = simulate_clip(fem, n, p); c = cd['c']; pxm = cd['pxm']; dt = plan['dt']; t0 = plan['t_sq'] + plan['t_hold']
+        cd, plan, x = simulate_clip(fem, n, p); c = cd['c']; pxm = cd['pxm']; dt = plan['dt']; t0 = plan['n_sep'] * dt
         k = np.clip(np.round((t0 + c['t']) / dt).astype(int), 0, plan['n'])
         hs = (x[k, fem.top, 1] - x[k, fem.bot, 1]) * pxm                 # model height in px at the measured frame times
         h_rmse = 100 * np.sqrt(np.mean((hs - c['h']) ** 2)) / c['rest']
