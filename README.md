@@ -1,6 +1,6 @@
 # neural_simulation: learning a soft ball's deformation from video
 
-One foam ball, one steel tin that presses it and is pulled away, filmed at 1080p / 240 fps. From that video I fit physics models of how the ball squashes and recovers, and test them on clips held out of the fit (no refitting). Twelve models in three families are compared on the same footing.
+One foam ball, one steel tin that presses it and is pulled away, filmed at 1080p / 240 fps. From that video I fit physics models of how the ball squashes and recovers, and test them on clips held out of the fit (no refitting). Thirteen models in three families are compared on the same footing.
 **The models are physics, not learned**: spring and continuum solvers (hand-written, or NVIDIA Warp) with a handful of physical constants fitted by least squares or Adam (system identification). The only neural network is the **pretrained SAM 2** segmentation model used for tracking (together with a colour-threshold tracker).
 
 ```bash
@@ -54,20 +54,21 @@ Height error after separation (RMSE, % of ball height) on the **held-out clips**
 | **axisymmetric FEM (Warp)** | **1.7 %** | +0.46 | 24 / 24 | E = 38 kPa, ν = 0.10; smooth round ball; reproduces the outline |
 | foam core, shape fit (mesh) | 1.9 % | +0.42 | 16 / 16 | recovers too fast |
 | foam core, with-lift (mesh) | 2.0 % | +0.40 | 16 / 15 | hop on deep presses |
+| **axisymmetric FEM, damping relative to centre of mass ×16** | **1.4 %** | +0.62 | 20 / 20 | lowest height error; keeps a hop (4-8 mm vs real 3-7); 95 % recovery slightly fast on test clips; α chosen on training clips only (hop_scan) |
 | **3D MPM (Warp), FEM material** | 2.1 % | +0.38 | 27 / 27 | point and side loads (unvalidated) |
 | foam core, height fit (mesh) | 3.2 % | +0.20 | 11 / 10 | closest hop of the meshes |
 | 3D gas shell | 3.9 % | 0.00 | 22 / 9 | fit stalled; rings |
 | bounce + recovery | not comparable | | | covers only the time after the first hop apex; reproduces the hop |
 | axisymmetric FEM, instant release (old protocol) | 3.1 % | +0.05 | 30 / 30 | ablation: the tin retreat is worth 1.4 points |
 
-**Reading it honestly.** After the correction most physics models beat the plain exponential, and the spread among the good ones (1.1-2.1 %) is about the tracker's noise, so they cannot be ranked on height alone. The protocol (driving the measured tin retreat) mattered more than the model choice. The continuum models are not more accurate on height than the 1D models; what they add is physical constants that do not depend on the discretisation, a smooth ball that reproduces the outline, and a route to other loads. Only the spring models produce a hop, and none gets it right on every clip.
+**Reading it honestly.** After the correction most physics models beat the plain exponential, and the spread among the good ones (1.1-2.1 %) is about the tracker's noise, so they cannot be ranked on height alone. The protocol (driving the measured tin retreat) mattered more than the model choice. The continuum models are not more accurate on height than the 1D models; what they add is physical constants that do not depend on the discretisation, a smooth ball that reproduces the outline, and a route to other loads. Only the spring models and the relative-damping FEM variant produce a hop; the spring models get it right on training clips only.
 
 ## Limitations (read before relying on any number)
 - **The tin's motion is an input.** The compressed height and the measured tin trajectory come from the video; the models predict the ball's response after separation (and the outline).
 - **Only flat top presses were fitted and tested.** The point-probe and side-plate loads (spring engine, MPM) are predictions with no video to test against.
 - **No ball mass was measured accurately:** stiffness and damping of the spring models are per unit mass; the continuum models assume 55 kg/m³ (E scales linearly with it). The diameter (6.7 cm) is a rough estimate that sets the pixel scale and the gravity term.
 - **Mass-spring parameters depend on the mesh**; the continuum constants should not.
-- **No hop in the continuum models** (mass-proportional damping). Tin friction or suction may add to the real hop and is not modelled.
+- **No hop in the default continuum models** (mass-proportional damping); the FEM variant with damping relative to the centre of mass (×16) hops 4-8 mm, but E, ν and friction were fitted with absolute damping and only α was rescaled, and its hop starts ~5 ms after separation versus ~20 ms in the video. MPM has no such option yet. Tin friction or suction may add to the real hop and is not modelled.
 - **Fit status:** two training clips and two test clips give a rough spread, not a confidence interval; the gas-shell fit never left its starting values; the no-lift fit ended with one stiffness on its bound; mesh fits use two or three starting points and 20-30 optimizer steps.
 - **Tracking:** fixed table line (pixel row 740, one camera pose); the cause of the irregular frame gaps is not verified; SAM 2 and the colour tracker agree after release but differ while pressed (the continuum models and the refitted older models use SAM 2).
 

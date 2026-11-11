@@ -1,5 +1,5 @@
 """Videos and a plot for the hop experiment (see hop_experiment.py): real clip | FEM as fitted (absolute damping, no hop) | FEM damped relative to the centre of mass at 8x, 4x and 1x the fitted strength.
-The view is zoomed out (2400 px per metre) so the large hops stay in frame; the 1x variant leaves the top of the frame. Time zero = separation, slowed 8x. Usage: render_hop_experiment.py CLIP"""
+The view is zoomed out (2400 px per metre) so the large hops stay in frame; damped relative to the centre of mass at 12x, 16x and 24x. Time zero = separation, slowed 8x. Usage: render_hop_experiment.py CLIP"""
 import sys, json, subprocess
 import numpy as np, cv2
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ from render_fem import panel
 from clip_prep import prep
 
 S2, BASE, SLOW, FPS = 2400.0, 60, 8, 30
-VARIANTS = [('FEM as fitted: absolute damping (no hop)', 0.0, 1.0), ('relative to centre of mass, 8x damping', 1.0, 8.0), ('relative, 4x damping', 1.0, 4.0), ('relative, 1x damping (fitted strength)', 1.0, 1.0)]
+VARIANTS = [('FEM as fitted: absolute damping (no hop)', 0.0, 1.0), ('relative to centre of mass, 12x damping', 1.0, 12.0), ('relative, 16x damping (best on training clips)', 1.0, 16.0), ('relative, 24x damping', 1.0, 24.0)]
 
 def main(name):
     P = json.load(open(f'{OUT}/params_fem.json')); base = np.array(P['prm']); fem = FEM(); c = prep(name); sims = []

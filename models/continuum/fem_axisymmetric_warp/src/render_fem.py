@@ -36,20 +36,21 @@ def panel(arc, plate_z, az, el, label, S_=S, base=90):
             cv2.fillPoly(img, [np.stack([sx(px), sy(py)], 1).astype(np.int32)], c)
     cv2.putText(img, label, (8, 22), cv2.FONT_HERSHEY_SIMPLEX, .5, (20, 20, 20), 1, cv2.LINE_AA); return img
 
-def main(name):
-    P = json.load(open(f'{OUT}/params_fem.json')); fem = FEM()
-    cd, plan, x = simulate_clip(fem, name, np.array(P['prm'])); dt = plan['dt']; t0 = plan['n_sep'] * dt
+def main(name, variant='abs'):
+    P = json.load(open(f'{OUT}/params_fem.json')); fem = FEM(); prm = np.array(P['prm']); rel = 1.0 if variant == 'rel16' else 0.0
+    if rel: prm[2] *= 16.0                                              # damping relative to the centre of mass, 16x the fitted rate (chosen on the training clips, see hop_scan.py)
+    cd, plan, x = simulate_clip(fem, name, prm, rel=rel); dt = plan['dt']; t0 = plan['n_sep'] * dt
     Tr = cd['tin'][0][-1]; tt = np.arange(-(Tr + 0.03), POST, 1 / (FPS * SLOW)); real = real_panels(name, tt)      # window starts just before the tin begins to retreat
     out = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'bgr24', '-s', f'{3*PX}x{PX+34}', '-r', str(FPS), '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
-                            f'{OUT}/real_vs_fem_{name}.mp4'], stdin=subprocess.PIPE)
+                            f'{OUT}/real_vs_fem{"_hop16" if rel else ""}_{name}.mp4'], stdin=subprocess.PIPE)
     tag = 'TRAINING clip' if name in ('IMG_0536', 'IMG_0537') else 'HELD-OUT clip'
     for t, rp in zip(tt, real):
         k = int(np.clip(round((t0 + t) / dt), 0, plan['n'])); arc = x[k, fem.arc].astype(np.float64); pz = plan['plate'][k]
         side = panel(arc, pz, 0, 0, 'FEM (axisymmetric, Warp): side view'); obl = panel(arc, pz, 35, 25, 'FEM: oblique')
         rp = rp.copy(); cv2.putText(rp, f'REAL  {name}', (8, 22), cv2.FONT_HERSHEY_SIMPLEX, .5, (20, 20, 20), 1, cv2.LINE_AA)
         c = np.full((PX + 34, 3 * PX, 3), 255, np.uint8); c[34:, :PX], c[34:, PX:2 * PX], c[34:, 2 * PX:] = rp, side, obl
-        cv2.putText(c, f't = {t*1e3:+6.0f} ms from release   (slowed {SLOW}x; same clock for real and model)   axisymmetric FEM, fitted on 0536+0537; {tag}', (8, 22), cv2.FONT_HERSHEY_SIMPLEX, .55, (20, 20, 20), 1, cv2.LINE_AA)
+        cv2.putText(c, f't = {t*1e3:+6.0f} ms from release   (slowed {SLOW}x; same clock for real and model)   axisymmetric FEM{" + relative damping x16 (hop)" if rel else ""}, fitted on 0536+0537; {tag}', (8, 22), cv2.FONT_HERSHEY_SIMPLEX, .55, (20, 20, 20), 1, cv2.LINE_AA)
         out.stdin.write(c.tobytes())
-    out.stdin.close(); out.wait(); print('wrote', f'{OUT}/real_vs_fem_{name}.mp4')
+    out.stdin.close(); out.wait(); print('wrote', f'{OUT}/real_vs_fem{"_hop16" if rel else ""}_{name}.mp4')
 
-if __name__ == '__main__': main(sys.argv[1])
+if __name__ == '__main__': main(*sys.argv[1:3])

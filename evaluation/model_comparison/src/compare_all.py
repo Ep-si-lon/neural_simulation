@@ -13,7 +13,7 @@ INFO = {  # key: (label, family, colour, style)
     'bounce_recovery': ('bounce + recovery', 'lumped 1D', '#1f77b4', '-'), 'two_mass_spring': ('two-mass spring', 'lumped 1D', '#4a98d9', '-'), 'fast_snap': ('fast-snap two-mass', 'lumped 1D', '#8ec1ea', '-'),
     'gas_shell': ('3D gas shell', '3D spring mesh', '#d62728', '-'), 'foam_core_height_fit': ('3D foam core, height fit', '3D spring mesh', '#ff7f0e', '-'), 'foam_core_shape_fit': ('3D foam core, shape fit', '3D spring mesh', '#e8a33d', '-'),
     'foam_core_no_lift': ('3D foam core, no-lift', '3D spring mesh', '#f2c57c', '-'), 'foam_core_with_lift': ('3D foam core, with-lift', '3D spring mesh', '#b5651d', '-'),
-    'fem_instant_release': ('axisymmetric FEM, instant release (old protocol)', 'continuum', '#b7e3b7', ':'), 'fem_axisymmetric_warp': ('axisymmetric FEM (Warp)', 'continuum', '#2ca02c', '-'), 'mpm_3d_warp_fem_damping': ('3D MPM, FEM damping', 'continuum', '#9ad39a', '-'), 'mpm_3d_warp': ('3D MPM, calibrated damping', 'continuum', '#006400', '-')}
+    'fem_instant_release': ('axisymmetric FEM, instant release (old protocol)', 'continuum', '#b7e3b7', ':'), 'fem_axisymmetric_warp': ('axisymmetric FEM (Warp)', 'continuum', '#2ca02c', '-'), 'fem_relative_damping': ('axisymmetric FEM, damping relative to centre of mass x16 (hop)', 'continuum', '#0b6e4f', '--'), 'mpm_3d_warp_fem_damping': ('3D MPM, FEM damping', 'continuum', '#9ad39a', '-'), 'mpm_3d_warp': ('3D MPM, calibrated damping', 'continuum', '#006400', '-')}
 KEYS = [k for k in INFO if k in R]
 GRID = np.arange(0, 0.25, 0.005); FINE = np.arange(0, 0.25, 0.001)
 NOT_COMPARABLE = {'bounce_recovery'}                       # only predicts the time after its first hop apex (height already ~99 %), so height error and t95 are not comparable

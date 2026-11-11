@@ -40,3 +40,6 @@ Run `./run.sh` (about 5 min). Full tables: [outputs/results_tables.md](outputs/r
 | 3D foam core (4 variants) | spring mesh, radial foam core | 4 each | per unit mass / mesh-dependent | flat (engine: point, sides) | varies |
 | axisymmetric FEM (Warp) | continuum, 2D slice revolved | 5 (E, ν, α, 2 frictions) | Pa (assumed ρ) / yes | flat | no |
 | 3D MPM (Warp) | continuum, particles | 0 new + 1 calibrated damping | Pa / yes | flat, point, side (unvalidated) | no |
+
+## Added: FEM with damping relative to the centre of mass (×16)
+`fem_relative_damping` reruns the fitted FEM with damping that acts only on motion relative to the ball's centre (so the whole ball can hop) at 16× the fitted rate. The factor was chosen on the training clips only (`models/continuum/fem_axisymmetric_warp/outputs/hop_scan.json`). It has the lowest held-out height error (1.6 / 1.3 %) and hops 4-8 mm (real 3-7 mm), but E, ν and friction were not refitted for it, and on clip 0538 it hops about twice the real height (24× fits that clip better). Tables and figures above include it.

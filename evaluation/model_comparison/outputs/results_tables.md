@@ -13,6 +13,7 @@
 | 3D foam core, with-lift | 3D spring mesh | from release | 3.0 | 3.8 | 2.1 | 1.9 | **2.0** |
 | axisymmetric FEM, instant release (old protocol) | continuum | from release | 5.2 | 5.7 | 3.1 | 3.1 | **3.1** |
 | axisymmetric FEM (Warp) | continuum | from release | 3.2 | 3.2 | 1.9 | 1.4 | **1.7** |
+| axisymmetric FEM, damping relative to centre of mass x16 (hop) | continuum | from release | 2.1 | 1.7 | 1.6 | 1.3 | **1.4** |
 | 3D MPM, FEM damping | continuum | from release | 3.5 | 3.6 | 2.2 | 1.8 | **2.0** |
 | 3D MPM, calibrated damping | continuum | from release | 3.5 | 3.3 | 2.3 | 1.9 | **2.1** |
 
@@ -28,6 +29,7 @@
 | 3D foam core, with-lift | +0.44 | +0.38 | +0.33 | +0.46 |
 | axisymmetric FEM, instant release (old protocol) | +0.02 | +0.06 | +0.01 | +0.09 |
 | axisymmetric FEM (Warp) | +0.41 | +0.48 | +0.39 | +0.58 |
+| axisymmetric FEM, damping relative to centre of mass x16 (hop) | +0.62 | +0.72 | +0.49 | +0.63 |
 | 3D MPM, FEM damping | +0.34 | +0.41 | +0.27 | +0.48 |
 | 3D MPM, calibrated damping | +0.35 | +0.46 | +0.25 | +0.45 |
 
@@ -46,6 +48,7 @@
 | 3D foam core, with-lift | 19 | 19 | 16 | 15 | 10 |
 | axisymmetric FEM, instant release (old protocol) | 34 | 34 | 30 | 30 | 4 |
 | axisymmetric FEM (Warp) | 30 | 31 | 24 | 24 | 2 |
+| axisymmetric FEM, damping relative to centre of mass x16 (hop) | 33 | 34 | 20 | 20 | 6 |
 | 3D MPM, FEM damping | 28 | 29 | 21 | 21 | 4 |
 | 3D MPM, calibrated damping | 36 | 37 | 27 | 27 | 2 |
 
@@ -60,6 +63,7 @@
 | 3D foam core, with-lift (curve width; real = 1.069, 1.069, 1.030, 1.029) | 1.014 | 1.018 | 0.992 | 0.993 | 3.2 |
 | axisymmetric FEM, instant release (old protocol) | 1.116 | 1.139 | 1.049 | 1.050 | 4.0 |
 | axisymmetric FEM (Warp) | 1.129 | 1.157 | 1.053 | 1.055 | 4.0 |
+| axisymmetric FEM, damping relative to centre of mass x16 (hop) | 1.129 | 1.157 | 1.053 | 1.055 | 4.0 |
 | 3D MPM, FEM damping | 1.114 | 1.140 | 1.043 | 1.045 | - |
 | 3D MPM, calibrated damping | 1.114 | 1.140 | 1.043 | 1.045 | - |
 
@@ -77,6 +81,7 @@
 | 3D foam core, with-lift | 6.4 | 7.8 | 0.9 | 0.7 |
 | axisymmetric FEM, instant release (old protocol) | 0.0 | 0.0 | 0.0 | 0.0 |
 | axisymmetric FEM (Warp) | 0.0 | 0.0 | 0.0 | 0.0 |
+| axisymmetric FEM, damping relative to centre of mass x16 (hop) | 4.3 | 4.5 | 8.0 | 6.3 |
 | 3D MPM, FEM damping | 0.0 | 0.0 | 0.0 | 0.0 |
 | 3D MPM, calibrated damping | 0.0 | 0.0 | 0.0 | 0.0 |
 
@@ -91,7 +96,8 @@
 | 3D foam core, shape fit | 3.3 |
 | 3D foam core, no-lift | 3.3 |
 | 3D foam core, with-lift | 3.3 |
-| axisymmetric FEM, instant release (old protocol) | 1.5 |
-| axisymmetric FEM (Warp) | 1.9 |
-| 3D MPM, FEM damping | 5.7 |
-| 3D MPM, calibrated damping | 5.8 |
+| axisymmetric FEM, instant release (old protocol) | 1.6 |
+| axisymmetric FEM (Warp) | 2.0 |
+| axisymmetric FEM, damping relative to centre of mass x16 (hop) | 6.9 |
+| 3D MPM, FEM damping | 5.8 |
+| 3D MPM, calibrated damping | 5.9 |
