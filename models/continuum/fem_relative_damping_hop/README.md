@@ -41,6 +41,21 @@ My earlier note that "one damping number cannot match both hop and recovery" was
 
 **How ×16 was chosen:** score = height RMSE + 0.1·|recovery-time error| + 0.3·|hop error|, averaged over the two **training** clips only (0536, 0537). ×16 has the lowest training score (3.30; absolute damping 6.29) and a test score of 2.99 (absolute 3.35). The held-out clips were reported but not used to pick it. The factors are on a coarse grid (8, 12, 16, 24, 32, 48), so ×16 is "best of the grid", not a precise optimum.
 
+### Fine scan between ×12 and ×16 (steps of 0.5; `python src/hop_scan.py 12 12.5 ... 16`, `outputs/hop_scan_fine.json`, `.png`)
+| α multiplier | Height RMSE %, 0536 / 0537 / 0538 / 0539 | 95 % recovery (ms) (real 37 / 42 / 29 / 25) | Hop (mm) (real 7.1 / 7.5 / 3.3 / 5.4) | train score | test score |
+| --- | --- | --- | --- | --- | --- |
+| ×12 | 2.4 / 2.8 / 1.9 / 1.6 | 24 / 26 / 16 / 16 | 15.2 / 16.1 / 14.6 / 12.8 | 6.58 | 5.65 |
+| ×12.5 | 2.4 / 2.6 / 1.9 / 1.5 | 26 / 26 / 16 / 16 | 13.3 / 14.0 / 13.5 / 11.8 | 5.77 | 5.29 |
+| ×13 | 2.3 / 2.5 / 1.8 / 1.5 | 26 / 28 / 16 / 16 | 11.6 / 12.1 / 12.5 / 10.8 | 5.03 | 4.95 |
+| ×13.5 | 2.2 / 2.4 / 1.8 / 1.4 | 28 / 28 / 16 / 18 | 10.0 / 10.4 / 11.6 / 9.9 | 4.33 | 4.54 |
+| ×14 | 2.2 / 2.2 / 1.8 / 1.4 | 28 / 30 / 18 / 18 | 8.6 / 8.9 / 10.8 / 9.1 | 3.71 | 4.16 |
+| **×14.5** | 2.1 / 2.1 / 1.7 / 1.4 | 30 / 30 / 18 / 18 | 7.3 / 7.6 / 10.0 / 8.3 | **3.14** | 3.89 |
+| ×15 | 2.1 / 2.0 / 1.7 / 1.3 | 30 / 32 / 18 / 20 | 6.2 / 6.4 / 9.3 / 7.6 | 3.17 | 3.54 |
+| ×15.5 | 2.1 / 1.8 / 1.6 / 1.3 | 32 / 34 / 20 / 20 | 5.2 / 5.4 / 8.7 / 6.9 | 3.20 | 3.21 |
+| ×16 | 2.1 / 1.7 / 1.6 / 1.3 | 34 / 34 / 20 / 20 | 4.4 / 4.5 / 8.0 / 6.3 | 3.30 | 2.99 |
+
+Reading it: below ×14 the hop is too large and the score climbs steeply. From ×14.5 to ×16 the training score is flat (3.14-3.30, a difference smaller than the clip-to-clip noise), so the training clips cannot separate those values. Going up the range the hop shrinks (training clips: 7.3 mm at ×14.5, matching the real 7.1 / 7.5, down to 4.4 at ×16) while the recovery slows towards the real 37 / 42 ms on the training clips; the held-out clips keep preferring the larger values (test score 3.89 to 2.99), but they must not be used to choose. The rule fixed beforehand (lowest training score) selects **×14.5**; ×15 to ×15.5 are equally defensible on the training clips. The default model and the comparison still use ×16 until one is chosen.
+
 ## 4. What it does to the comparison
 Held-out height error 1.6 / 1.3 % (test mean 1.4 %), the lowest of every model; hop 4-8 mm like the real 3-7 mm. See [../../../evaluation/model_comparison/README.md](../../../evaluation/model_comparison/README.md) (row "axisymmetric FEM, damping relative to centre of mass ×16 (hop)").
 
