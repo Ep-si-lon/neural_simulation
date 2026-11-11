@@ -10,8 +10,8 @@ from render3d import project, S
 SLOW, FPS, PRE, POST = 8, 30, 0.06, 0.25
 NAZ = 72
 
-def panel(arc, plate_z, az, el, label):
-    img = np.full((PX, PX, 3), 238, np.uint8); sx = lambda x: x * S + PX / 2; sy = lambda y: PX - 90 - y * S
+def panel(arc, plate_z, az, el, label, S_=S, base=90):
+    img = np.full((PX, PX, 3), 238, np.uint8); sx = lambda x: x * S_ + PX / 2; sy = lambda y: PX - base - y * S_
     th = np.linspace(0, 2 * np.pi, 48); tab = np.stack([0.12 * np.cos(th), np.zeros_like(th), 0.12 * np.sin(th)], 1); tx, ty, _ = project(tab, az, el)
     cv2.fillPoly(img, [np.stack([sx(tx), sy(ty)], 1).astype(np.int32)], (170, 175, 180))
     r, z = arc[:, 0], arc[:, 1]; ph = np.linspace(0, 2 * np.pi, NAZ, endpoint=False)
